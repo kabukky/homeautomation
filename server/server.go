@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -9,6 +10,11 @@ import (
 
 func Start() {
 	router := httprouter.New()
+	// Dashboard
 	router.ServeFiles("/dashboard/*filepath", http.Dir(utils.DirectoryDashboard))
+	// Weather
+	router.GET(utils.APIBasePath+"weather", getWeather)
+	router.GET(utils.APIBasePath+"calendar", getCalendar)
+	log.Println("Starting HTTP server on port", utils.HostAndPort)
 	http.ListenAndServe(utils.HostAndPort, router)
 }
