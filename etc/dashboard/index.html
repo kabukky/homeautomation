@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="lib/weather-icons/css/weather-icons.min.css" rel="stylesheet">
+        <link href="lib/materialdesign-icons/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="lib/fullcalendar/main.css" rel="stylesheet">
+        <link href="index.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container-fluid h-100">
+            <div class="row h-50">
+                <div class="col-4 align-self-center px-5">
+                    <div class="row">
+                        <div class="col" id="date">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col" id="time">
+                        </div>
+                    </div>
+                    <div class="row justify-content-center pt-4">
+                        <div class="col-5" id="weather-current-temperature">
+                        </div>
+                        <div class="col-5 ps-4 ms-4" id="weather-current-icon">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <div class="row">
+                        <canvas id="temperature-chart"></canvas>
+                    </div>
+                    <div class="row p-2 pe-2 pt-1 pb-1" id="temperature-chart-images">
+                    </div>
+                    <div class="row ps-2 pe-2" id="temperature-chart-precipitation-probability">
+                    </div>
+                </div>
+            </div>
+            <div class="row h-50">
+                <div class="col-4 p-5">
+                    <div class="row">
+                        <div class="col">
+                            <div class="row">
+                                <span class="mdi mdi-washing-machine h2 p-0"> Waschmaschine</span>
+                            </div>
+                            <div class="row h5">
+                                Aus
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pt-5">
+                        <div class="col">
+                            <div class="row">
+                                <span class="mdi mdi-tumble-dryer h2 p-0"> Trockner</span>
+                            </div>
+                            <div class="row h5">
+                                Aus
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8 pt-5">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col" id="cal-col-1"></div>
+                            <div class="col" id="cal-col-2"></div>
+                            <div class="col" id="cal-col-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="lib/moment/moment-with-locales.min.js"></script>
+        <script src="lib/chart/chart.min.js"></script>
+        <script src="lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
+        <script src="index.js"></script>
+    </body>
+</html>
