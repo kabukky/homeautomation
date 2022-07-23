@@ -10,7 +10,7 @@ import (
 )
 
 func getWeather(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	weatherData, err := weather.Get(r.Context())
+	weatherData, err := weather.GetCached(r.Context())
 	if err != nil {
 		respondWithError(w, err.Error(), http.StatusInternalServerError)
 		return
