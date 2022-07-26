@@ -44,6 +44,18 @@ function showCalendar(data) {
                 dates.push(new Date(startDate));
             }
             dates.forEach(function (date) {
+                // Check if date is before today
+                var today = new Date();
+                if (date.getFullYear() < today.getFullYear()) {
+                    return;
+                }
+                if (date.getFullYear() == today.getFullYear() && date.getMonth() < today.getMonth()) {
+                    return;
+                }
+                if (date.getFullYear() == today.getFullYear() && date.getMonth() == today.getMonth() && date.getDate() < today.getDate()) {
+                    return;
+                }
+                
                 var key = moment(date).format("YYYY/MM/DD");
                 if (!events[key]) {
                     events[key] = []
