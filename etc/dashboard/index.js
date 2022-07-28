@@ -107,6 +107,10 @@ function showCalendar(data) {
         calendarContainers[containerIndex].innerHTML += '<div class="row pt-2 mx-1 date-calendar fw-bold">' + moment(keyDate).format("ddd, Do MMMM YYYY") + '</div>'
         rowIndex++;
         if (events[key].length == 0) {
+            containerIndex = determineColumnIndex(rowIndex, maxRowsPerColumn)
+            if (containerIndex == -1) {
+                return;
+            }
             calendarContainers[containerIndex].innerHTML += '<div class="row m-1 p-1"><span class="px-1">Nichts geplant</span></div>'
             rowIndex++;
         } else {
@@ -151,7 +155,6 @@ function showCalendar(data) {
                     textColorString = "text-black";
                     styleString += '#ffffff;border:solid #000000;border-width: 1px;color: #000000"'
                 }
-                calendarContainers[containerIndex].innerHTML += '<div class="row m-1 p-1 rounded ' + textColorString + '" ' + styleString + '><span class="px-1">' + event.title + '</span><small class="px-1">' + timeString + '</small></div>'
                 rowIndex++;
                 if (timeString != "") {
                     // Additional row for displaying time
@@ -161,6 +164,11 @@ function showCalendar(data) {
                     // Additional row for likely line break in title
                     rowIndex++;
                 }
+                if (rowIndex >= (maxRowsPerColumn*3)) {
+                    // Not enough rows remaing to add this event
+                    return;
+                }
+                calendarContainers[containerIndex].innerHTML += '<div class="row m-1 p-1 rounded ' + textColorString + '" ' + styleString + '><span class="px-1">' + event.title + '</span><small class="px-1">' + timeString + '</small></div>'
             });
         }
     }
