@@ -16,7 +16,7 @@ function showCalendar(data) {
 
     // We want the order of keys reversed in this case
     // But this is just for me
-    data = reverseObject(data);
+    // data = reverseObject(data);
 
     for (var key of Object.keys(data)) {
         // Only supporting two colors for now
@@ -157,7 +157,7 @@ function showCalendar(data) {
                     // Additional row for displaying time
                     rowIndex++;
                 }
-                if (event.title.length > 38) {
+                if (event.title.length > 30) {
                     // Additional row for likely line break in title
                     rowIndex++;
                 }
