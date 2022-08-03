@@ -89,37 +89,15 @@ function showCalendar(data) {
     calendarContainers.forEach(function (container) {
         container.innerHTML = '';
     });
+    var eventsHtml = [];
     for (var key of Object.keys(events)) {
-        // Determine if we should start a new column
-        containerIndex = determineColumnIndex(rowIndex, maxRowsPerColumn)
-        if (containerIndex == -1) {
-            break;
-        }
-        // We do not want to disyplay the date as the last row in a columnn
-        if (rowIndex == maxRowsPerColumn - 1 || rowIndex == (maxRowsPerColumn*2) - 1 || rowIndex == (maxRowsPerColumn*3) - 1) {
-            containerIndex++;
-            if (containerIndex >= calendarContainers.length) {
-                // No more columns available to display events in
-                break;
-            }
-        }
         var keyDate = new Date(key);
-        calendarContainers[containerIndex].innerHTML += '<div class="row pt-2 mx-1 date-calendar fw-bold">' + moment(keyDate).format("ddd, Do MMMM YYYY") + '</div>'
-        rowIndex++;
+        eventsHtml.push({type: 'heading', html: '<div class="row pt-2 mx-1 date-calendar fw-bold">' + moment(keyDate).format("ddd, Do MMMM YYYY") + '</div>'});
         if (events[key].length == 0) {
-            containerIndex = determineColumnIndex(rowIndex, maxRowsPerColumn)
-            if (containerIndex == -1) {
-                return;
-            }
-            calendarContainers[containerIndex].innerHTML += '<div class="row m-1 p-1"><span class="px-1">Nichts geplant</span></div>'
-            rowIndex++;
+            eventsHtml.push({type: 'event-empty', html: '<div class="row m-1 p-1"><span class="px-1">Nichts geplant</span></div>'});
         } else {
+            // Iterate events
             events[key].forEach(function (event) {
-                // Determine if we should start a new column
-                containerIndex = determineColumnIndex(rowIndex, maxRowsPerColumn)
-                if (containerIndex == -1) {
-                    return;
-                }
                 var startTimeString = moment(event.startDate).format("HH:mm")
                 var endTimeString = moment(event.endDate).format("HH:mm")
                 if (datesAreOnSameDay(event.startDate, keyDate)) {
@@ -155,21 +133,31 @@ function showCalendar(data) {
                     textColorString = "text-black";
                     styleString += '#ffffff;border:solid #000000;border-width: 1px;color: #000000"'
                 }
-                rowIndex++;
-                if (timeString != "") {
-                    // Additional row for displaying time
-                    rowIndex++;
-                }
-                if (event.title.length > 30) {
-                    // Additional row for likely line break in title
-                    rowIndex++;
-                }
-                if (rowIndex >= (maxRowsPerColumn*3)) {
-                    // Not enough rows remaing to add this event
-                    return;
-                }
-                calendarContainers[containerIndex].innerHTML += '<div class="row m-1 p-1 rounded ' + textColorString + '" ' + styleString + '><span class="px-1">' + event.title + '</span><small class="px-1">' + timeString + '</small></div>'
+                eventsHtml.push({type: 'event', html: '<div class="row m-1 p-1 rounded ' + textColorString + '" ' + styleString + '><span class="px-1">' + event.title + '</span><small class="px-1">' + timeString + '</small></div>'})
             });
+        }
+    }
+
+    for (var i = 0; i < eventsHtml.length; i++) {
+        if (containerIndex > calendarContainers.length) {
+            break;
+        }
+        // Add to DOM
+        var template = document.createElement('template');
+        var html = eventsHtml[i].html.trim();
+        template.innerHTML = html;
+        var elem = template.content.firstChild;
+        calendarContainers[containerIndex].appendChild(elem);
+        if (!isElementInViewport(elem)) {
+            calendarContainers[containerIndex].removeChild(elem);
+            // Remove heading if last element was a heading
+            var lastIndex = i - 1;
+            if (lastIndex >= 0 && eventsHtml[lastIndex].type == 'heading') {
+                calendarContainers[containerIndex].removeChild(calendarContainers[containerIndex].lastChild);
+                i--;
+            }
+            i--;
+            containerIndex++;
         }
     }
 }
@@ -352,6 +340,22 @@ function datesAreOnSameDay(date1, date2) {
         return true;
     }
     return false;
+}
+
+function isElementInViewport(el) {
+    // Special bonus for those using jQuery
+    if (typeof jQuery === "function" && el instanceof jQuery) {
+        el = el[0];
+    }
+
+    var rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */
+    );
 }
 
 // determineColumnIndex returns -1 if maximum number of columns is reached (3 columns fow now)
