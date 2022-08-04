@@ -139,7 +139,7 @@ function showCalendar(data) {
     }
 
     for (var i = 0; i < eventsHtml.length; i++) {
-        if (containerIndex > calendarContainers.length) {
+        if (containerIndex >= calendarContainers.length) {
             break;
         }
         // Add to DOM
@@ -247,6 +247,8 @@ function showWeather(data) {
         chartData.datasets[1].data = [];
     }
 
+    var lastPrecipitationDisplayed = false
+
     var chartOptions = {
         layout: {
             padding: {
@@ -284,7 +286,29 @@ function showWeather(data) {
                 anchor: "end",
                 align: "top",
                 offset: 10,
-                display: "auto"
+                display: function(context) {
+                    if (context.datasetIndex == 0) {
+                        return "auto";
+                    }
+                    var value = chartData.datasets[context.datasetIndex].data[context.dataIndex];
+                    if (value == 0) {
+                        lastPrecipitationDisplayed = false;
+                        return false;
+                    }
+                    if (lastPrecipitationDisplayed) {
+                        // Never display two labels next to each other
+                        lastPrecipitationDisplayed = false;
+                        return false;
+                    } else {
+                        // Do not display if next label is higher, but only if label before was not displayed
+                        if (context.dataIndex-1 >= 0 && chartData.datasets[context.datasetIndex].data[context.dataIndex-1] == 0 && context.dataIndex+1 < chartData.datasets[context.datasetIndex].data.length && chartData.datasets[context.datasetIndex].data[context.dataIndex+1] > value) {
+                            lastPrecipitationDisplayed = false;
+                            return false;
+                        }
+                        lastPrecipitationDisplayed = true;
+                        return true;
+                    }
+                }
             },
             tooltip: {
                 enabled: false
