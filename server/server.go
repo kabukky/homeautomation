@@ -15,6 +15,7 @@ func Start() {
 	// Weather
 	router.GET(utils.APIBasePath+"weather", getWeather)
 	router.GET(utils.APIBasePath+"calendar", getCalendar)
+	router.GET(utils.APIBasePath+"camera", getCamera)
 	log.Println("Starting HTTP server on port", utils.HostAndPort)
 	http.ListenAndServe(utils.HostAndPort, router)
 }
