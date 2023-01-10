@@ -1,4 +1,4 @@
-FROM golang:1.18
+FROM gocv/opencv:4.7.0
 
 WORKDIR /app
 COPY . .

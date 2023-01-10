@@ -18,6 +18,10 @@ var (
 	OpenWeatherMapAPIKey = mustEnvVar("OPENWEATHERMAP_API_KEY")
 
 	GoogleCalendarIDs = strings.Split(envVarOrDefault("GOOGLE_CALENDAR_IDS", ""), ",")
+
+	CameraHostDryer     = envVarOrDefault("CAMERA_HOST_DRYER", "http://esp32-cc7394")
+	CameraDebug, _      = strconv.ParseBool(envVarOrDefault("CAMERA_DEBUG", "false"))
+	CameraDebugFilename = envVarOrDefault("CAMERA_DEBUG_FILENAME", "capture.jpg")
 )
 
 func mustEnvVar(name string) string {

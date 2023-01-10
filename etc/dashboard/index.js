@@ -10,7 +10,29 @@ Chart.defaults.font.family = "Lato";
 Chart.defaults.font.weight = "400";
 moment.locale("de");
 
+
+function showCameraTimes(data) {
+    if (data.error) {
+        console.log("error for camera times:", JSON.stringify(data));
+        return;
+    }
+    console.log("CAMERA TIMES:", JSON.stringify(data));
+    var dryerContainer = document.getElementById("dryer-display");
+    if (!data.dryer_minutes || data.dryer_minutes == -2) {
+        dryerContainer.innerHTML = 'Aus';
+    } else if (data.dryer_minutes == -1) {
+        dryerContainer.innerHTML = 'Fertig';
+    } else {
+        dryerContainer.innerHTML = 'Noch ' + convertMinsToString(data.dryer_minutes);
+    }
+
+}
+
 function showCalendar(data) {
+    if (data.error) {
+        console.log("error for calendar:", JSON.stringify(data));
+        return;
+    }
     var events = {};
     var colorIndex = 1;
 
@@ -163,6 +185,13 @@ function showCalendar(data) {
 }
 
 function showWeather(data) {
+    if (data.error) {
+        console.log("error for weather:", JSON.stringify(data));
+        return;
+    }
+    if (!data.forecast) {
+        return;
+    }
     var sunset = new Date(data.current.sunset);
     var sunrise = new Date(data.current.sunrise);
 
@@ -395,6 +424,28 @@ function determineColumnIndex(rowIndex, maxRowsPerColumn) {
     }
 }
 
+function convertMinsToString(minutes) {
+    output = "";
+    var h = Math.floor(minutes / 60);
+    if (h > 0) {
+        output += h + " Stunde";
+        if (h > 1) {
+            output += "n";
+        }
+    }
+    var m = minutes % 60;
+    if (m > 0) {
+        if (output != "") {
+            output += " und "
+        }
+        output += m + " Minute";
+        if (m > 1) {
+            output += "n";
+        }
+    }
+    return output;
+}
+
 function updateDashboard() {
     // Update date
     var currentDate = moment(new Date());
@@ -412,6 +463,12 @@ function updateDashboard() {
     fetch("/api/v1/calendar")
     .then(response => response.json())
     .then(data => showCalendar(data));
+    
+
+    // Update camera times
+    fetch("/api/v1/camera")
+    .then(response => response.json())
+    .then(data => showCameraTimes(data));
 }
 
 updateDashboard();

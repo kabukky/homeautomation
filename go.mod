@@ -1,9 +1,10 @@
 module github.com/kabukky/homeautomation
 
-go 1.17
+go 1.18
 
 require (
 	github.com/julienschmidt/httprouter v1.3.0
+	gocv.io/x/gocv v0.31.0
 	google.golang.org/api v0.60.0
 )
 
