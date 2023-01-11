@@ -47,7 +47,7 @@ var (
 	errorMachineDone = errors.New("machine done")
 )
 
-func RecognizeDigits(imageBytes []byte) ([]int, error) {
+func RecognizeDryer(imageBytes []byte) ([]int, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageBytes))
 	if err != nil {
 		return nil, err
@@ -64,13 +64,54 @@ func RecognizeDigits(imageBytes []byte) ([]int, error) {
 	gocv.Rotate(mat, &rotated, gocv.Rotate180Clockwise)
 
 	// Coordinates for perspective transform
-	origImg := []image.Point{
+	displayCoords := []image.Point{
 		image.Point{834, 190}, // top-left
 		image.Point{834, 224}, // bottom-left
 		image.Point{915, 217}, // bottom-right
 		image.Point{918, 178}, // top-right
 	}
+	return RecognizeDigits(&rotated, displayCoords, 210)
+}
 
+func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {
+	img, _, err := image.Decode(bytes.NewReader(imageBytes))
+	if err != nil {
+		return nil, err
+	}
+	mat, err := gocv.ImageToMatRGB(img)
+	if err != nil {
+		return nil, err
+	}
+	defer mat.Close()
+
+	// Rotate
+	rotated := gocv.NewMat()
+	defer rotated.Close()
+	gocv.Rotate(mat, &rotated, gocv.Rotate90CounterClockwise)
+
+	// Coordinates for perspective transform
+	displayCoords := []image.Point{
+		image.Point{437, 215}, // top-left
+		image.Point{442, 258}, // bottom-left
+		image.Point{517, 246}, // bottom-right
+		image.Point{512, 201}, // top-right
+	}
+	return RecognizeDigits(&rotated, displayCoords, 170)
+}
+
+func RecognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold float32) ([]int, error) {
+	if utils.CameraDebug {
+		temp := mat.Clone()
+		defer temp.Close()
+		gocv.Polylines(&temp, gocv.NewPointsVectorFromPoints([][]image.Point{displayCoords}), true, color.RGBA{255, 0, 0, 255}, 1)
+		window := gocv.NewWindow("Hello")
+		for {
+			window.IMShow(temp)
+			if window.WaitKey(1) >= 0 {
+				break
+			}
+		}
+	}
 	// Transform for correct perspective
 	height := 220
 	width := 400
@@ -80,11 +121,11 @@ func RecognizeDigits(imageBytes []byte) ([]int, error) {
 		image.Point{width, height},
 		image.Point{width, 0},
 	}
-	transform := gocv.GetPerspectiveTransform(gocv.NewPointVectorFromPoints(origImg), gocv.NewPointVectorFromPoints(newImg))
+	transform := gocv.GetPerspectiveTransform(gocv.NewPointVectorFromPoints(displayCoords), gocv.NewPointVectorFromPoints(newImg))
 	defer transform.Close()
 	perspective := gocv.NewMat()
 	defer perspective.Close()
-	gocv.WarpPerspective(rotated, &perspective, transform, image.Point{width, height})
+	gocv.WarpPerspective(*mat, &perspective, transform, image.Point{width, height})
 	if utils.CameraDebug {
 		window := gocv.NewWindow("Hello")
 		for {
@@ -103,7 +144,7 @@ func RecognizeDigits(imageBytes []byte) ([]int, error) {
 	// Threshold to make it black/white
 	destThreshold := gocv.NewMat()
 	defer destThreshold.Close()
-	gocv.Threshold(destGray, &destThreshold, 210, 255, gocv.ThresholdBinary)
+	gocv.Threshold(destGray, &destThreshold, minThreshold, 255, gocv.ThresholdBinary)
 
 	// Get edges
 	destEdge := gocv.NewMat()

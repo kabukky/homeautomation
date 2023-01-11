@@ -13,13 +13,11 @@ import (
 func main() {
 	if utils.CameraDebug {
 		runtime.LockOSThread()
-		log.Println("DEBUG")
 		image, err := os.ReadFile(utils.CameraDebugFilename)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Println("READ")
-		digits, err := camera.RecognizeDigits(image)
+		digits, err := camera.RecognizeWashingMachine(image)
 		if err != nil {
 			log.Fatalln(err)
 		}
