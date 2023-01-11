@@ -16,7 +16,7 @@ function showCameraTimes(data) {
         console.log("error for camera times:", JSON.stringify(data));
         return;
     }
-    console.log("CAMERA TIMES:", JSON.stringify(data));
+    // Dryer
     var dryerContainer = document.getElementById("dryer-display");
     if (!data.dryer_minutes || data.dryer_minutes == -2) {
         dryerContainer.innerHTML = 'Aus';
@@ -25,7 +25,15 @@ function showCameraTimes(data) {
     } else {
         dryerContainer.innerHTML = 'Noch ' + convertMinsToString(data.dryer_minutes);
     }
-
+    // Washing machine
+    var washingMachineContainer = document.getElementById("washing-machine-display");
+    if (!data.washing_machine_minutes || data.washing_machine_minutes == -2) {
+        washingMachineContainer.innerHTML = 'Aus';
+    } else if (data.washing_machine_minutes == -1) {
+        washingMachineContainer.innerHTML = 'Fertig';
+    } else {
+        washingMachineContainer.innerHTML = 'Noch ' + convertMinsToString(data.washing_machine_minutes);
+    }
 }
 
 function showCalendar(data) {
