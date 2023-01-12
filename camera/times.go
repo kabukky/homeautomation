@@ -11,8 +11,10 @@ import (
 )
 
 var (
-	globalTimesMutex sync.RWMutex
-	globalTimes      = createTimes()
+	globalTimesMutex      sync.RWMutex
+	globalTimes           = createTimes()
+	washingMachineRunning bool
+	dryerRunning          bool
 )
 
 type Times struct {
@@ -107,20 +109,29 @@ func refreshTimes() {
 
 	// Check if one of the machines just got done
 	globalTimesMutex.RLock()
-	lastTimes := globalTimes
-	globalTimesMutex.RUnlock()
-	if times.DryerMinutes == -1 && lastTimes.DryerMinutes != -2 && lastTimes.DryerMinutes != -1 {
+	if times.DryerMinutes == -1 && globalTimes.DryerMinutes != -1 && dryerRunning {
 		// Dryer was running last time and is now done
 		log.Println("Dryer just finished!")
-		pushover.SendPush("Der Trockner ist fertig! 🥳")
+		go pushover.SendPush("Der Trockner ist fertig! 🥳")
 	}
-	if times.WashingMachineMinutes == -1 && lastTimes.WashingMachineMinutes != -2 && lastTimes.WashingMachineMinutes != -1 {
+	if times.WashingMachineMinutes == -1 && globalTimes.WashingMachineMinutes != -1 && washingMachineRunning {
 		// Washing machine was running last time and is now done
 		log.Println("Washing machine just finished!")
-		pushover.SendPush("Die Waschmaschine ist fertig! 🤩")
+		go pushover.SendPush("Die Waschmaschine ist fertig! 🤩")
 	}
+	globalTimesMutex.RUnlock()
 
 	globalTimesMutex.Lock()
+	if times.DryerMinutes > -1 {
+		dryerRunning = true
+	} else if times.DryerMinutes == -1 {
+		dryerRunning = false
+	}
+	if times.WashingMachineMinutes > -1 {
+		washingMachineRunning = true
+	} else if times.WashingMachineMinutes == -1 {
+		washingMachineRunning = false
+	}
 	globalTimes = times
 	globalTimesMutex.Unlock()
 }
