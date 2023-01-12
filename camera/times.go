@@ -19,9 +19,15 @@ type Times struct {
 }
 
 func init() {
+	if utils.CameraDebug {
+		return
+	}
 	go func() {
 		for {
 			refreshTimes()
+			globalTimesMutex.RLock()
+			log.Println("globalTimes:", globalTimes)
+			globalTimesMutex.RUnlock()
 			// Refresh every minute
 			time.Sleep(1 * time.Minute)
 		}

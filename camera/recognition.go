@@ -3,6 +3,7 @@ package camera
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -43,7 +44,7 @@ var (
 		{true, true, true, true, false, true, true}:      9,
 		{false, false, false, true, false, false, false}: -1, // Means dash (-)
 	}
-	whiteThreshold   = 0.75
+	whiteThreshold   = 0.7
 	errorMachineDone = errors.New("machine done")
 )
 
@@ -361,7 +362,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 		}
 		recognizedDigit, ok := digitDefinitions[digitKey]
 		if !ok {
-			return nil, errors.New("could not recognize digit at index " + strconv.Itoa(index))
+			return nil, errors.New("could not recognize digit at index " + strconv.Itoa(index) + fmt.Sprintf(" for definition %+v", digitKey))
 		}
 		recognizedDigits = append(recognizedDigits, recognizedDigit)
 	}
