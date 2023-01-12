@@ -19,21 +19,21 @@ type CameraStatus struct {
 	Quality   int `json:"quality"`
 }
 
-func GetImage(esp32CamAddress string) ([]byte, error) {
+func getImage(esp32CamAddress string) ([]byte, error) {
 	// Check settings
-	settings, err := GetStatus(esp32CamAddress)
+	settings, err := getStatus(esp32CamAddress)
 	if err != nil {
 		return nil, err
 	}
 	if settings.Framesize != 13 {
-		err = SetStatus("framesize", "13", esp32CamAddress)
+		err = setStatus("framesize", "13", esp32CamAddress)
 		if err != nil {
 			return nil, err
 		}
 		time.Sleep(700 * time.Millisecond)
 	}
 	if settings.Quality != 4 {
-		err = SetStatus("quality", "4", esp32CamAddress)
+		err = setStatus("quality", "4", esp32CamAddress)
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +48,7 @@ func GetImage(esp32CamAddress string) ([]byte, error) {
 	return io.ReadAll(resp.Body)
 }
 
-func GetStatus(esp32CamAddress string) (*CameraStatus, error) {
+func getStatus(esp32CamAddress string) (*CameraStatus, error) {
 	// Get status
 	resp, err := httpClient.Get(esp32CamAddress + "/status")
 	if err != nil {
@@ -63,7 +63,7 @@ func GetStatus(esp32CamAddress string) (*CameraStatus, error) {
 	return &status, nil
 }
 
-func SetStatus(key, value string, esp32CamAddress string) error {
+func setStatus(key, value string, esp32CamAddress string) error {
 	log.Println("Setting camera status")
 	// Set status
 	resp, err := httpClient.Get(esp32CamAddress + "/control?var=" + key + "&val=" + value)

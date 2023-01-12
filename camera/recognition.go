@@ -70,7 +70,7 @@ func RecognizeDryer(imageBytes []byte) ([]int, error) {
 		image.Point{915, 217}, // bottom-right
 		image.Point{918, 178}, // top-right
 	}
-	return RecognizeDigits(&rotated, displayCoords, 210)
+	return recognizeDigits(&rotated, displayCoords, 210)
 }
 
 func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {
@@ -96,10 +96,10 @@ func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {
 		image.Point{517, 246}, // bottom-right
 		image.Point{512, 201}, // top-right
 	}
-	return RecognizeDigits(&rotated, displayCoords, 170)
+	return recognizeDigits(&rotated, displayCoords, 170)
 }
 
-func RecognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold float32) ([]int, error) {
+func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold float32) ([]int, error) {
 	if utils.CameraDebug {
 		temp := mat.Clone()
 		defer temp.Close()

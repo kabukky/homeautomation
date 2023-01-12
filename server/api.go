@@ -29,11 +29,7 @@ func getCalendar(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func getCamera(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	times, err := camera.GetTimes()
-	if err != nil {
-		respondWithError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	times := camera.GetTimes()
 	respondWithJSON(w, times)
 }
 

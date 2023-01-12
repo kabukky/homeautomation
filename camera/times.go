@@ -3,8 +3,14 @@ package camera
 import (
 	"log"
 	"sync"
+	"time"
 
 	"github.com/kabukky/homeautomation/utils"
+)
+
+var (
+	globalTimesMutex sync.RWMutex
+	globalTimes      = createTimes()
 )
 
 type Times struct {
@@ -12,18 +18,40 @@ type Times struct {
 	WashingMachineMinutes int `json:"washing_machine_minutes"` // done: -1, off: -2
 }
 
-func GetTimes() (*Times, error) {
+func init() {
+	go func() {
+		for {
+			refreshTimes()
+			// Refresh every minute
+			time.Sleep(1 * time.Minute)
+		}
+	}()
+}
+
+func createTimes() Times {
 	times := Times{
 		DryerMinutes:          -2,
 		WashingMachineMinutes: -2,
 	}
+	return times
+}
+
+func GetTimes() *Times {
+	globalTimesMutex.RLock()
+	times := globalTimes
+	globalTimesMutex.RUnlock()
+	return &times
+}
+
+func refreshTimes() {
+	times := createTimes()
 	var wg sync.WaitGroup
 
 	// Dryer
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		image, err := GetImage(utils.CameraHostDryer)
+		image, err := getImage(utils.CameraHostDryer)
 		if err != nil {
 			log.Println("Error while getting dryer image:", err)
 			return
@@ -47,7 +75,7 @@ func GetTimes() (*Times, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		image, err := GetImage(utils.CameraHostWashingMachine)
+		image, err := getImage(utils.CameraHostWashingMachine)
 		if err != nil {
 			log.Println("Error while getting washing machine image:", err)
 			return
@@ -68,5 +96,21 @@ func GetTimes() (*Times, error) {
 	}()
 
 	wg.Wait()
-	return &times, nil
+
+	// Check if one of the machines just got done
+	globalTimesMutex.RLock()
+	lastTimes := globalTimes
+	globalTimesMutex.RUnlock()
+	if times.DryerMinutes == -1 && lastTimes.DryerMinutes != -2 && lastTimes.DryerMinutes != -1 {
+		// Dryer was running last time and is now done
+		log.Println("Dryer just finished!")
+	}
+	if times.WashingMachineMinutes == -1 && lastTimes.WashingMachineMinutes != -2 && lastTimes.WashingMachineMinutes != -1 {
+		// Washing machine was running last time and is now done
+		log.Println("Washing machine just finished!")
+	}
+
+	globalTimesMutex.Lock()
+	globalTimes = times
+	globalTimesMutex.Unlock()
 }
