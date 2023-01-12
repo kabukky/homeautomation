@@ -97,7 +97,7 @@ func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {
 		image.Point{517, 246}, // bottom-right
 		image.Point{512, 201}, // top-right
 	}
-	return recognizeDigits(&rotated, displayCoords, 170)
+	return recognizeDigits(&rotated, displayCoords, 150)
 }
 
 func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold float32) ([]int, error) {
