@@ -1,10 +1,12 @@
 package camera
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/kabukky/homeautomation/pushover"
 	"github.com/kabukky/homeautomation/utils"
 )
 
@@ -26,7 +28,7 @@ func init() {
 		for {
 			refreshTimes()
 			globalTimesMutex.RLock()
-			log.Println("globalTimes:", globalTimes)
+			log.Println(fmt.Sprintf("globalTimes: %+v", globalTimes))
 			globalTimesMutex.RUnlock()
 			// Refresh every minute
 			time.Sleep(1 * time.Minute)
@@ -110,10 +112,12 @@ func refreshTimes() {
 	if times.DryerMinutes == -1 && lastTimes.DryerMinutes != -2 && lastTimes.DryerMinutes != -1 {
 		// Dryer was running last time and is now done
 		log.Println("Dryer just finished!")
+		pushover.SendPush("Der Trockner ist fertig! 🥳")
 	}
 	if times.WashingMachineMinutes == -1 && lastTimes.WashingMachineMinutes != -2 && lastTimes.WashingMachineMinutes != -1 {
 		// Washing machine was running last time and is now done
 		log.Println("Washing machine just finished!")
+		pushover.SendPush("Die Waschmaschine ist fertig! 🤩")
 	}
 
 	globalTimesMutex.Lock()

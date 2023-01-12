@@ -23,6 +23,9 @@ var (
 	CameraHostWashingMachine = envVarOrDefault("CAMERA_HOST_WASHING_MACHINE", "http://esp32-7640f1")
 	CameraDebug, _           = strconv.ParseBool(envVarOrDefault("CAMERA_DEBUG", "false"))
 	CameraDebugFilename      = envVarOrDefault("CAMERA_DEBUG_FILENAME", "capture.jpg")
+
+	PushoverToken   = mustEnvVar("PUSHOVER_TOKEN")
+	PushoverUserKey = mustEnvVar("PUSHOVER_USER_KEY")
 )
 
 func mustEnvVar(name string) string {
