@@ -15,11 +15,15 @@ var (
 	globalTimes           = createTimes()
 	washingMachineRunning bool
 	dryerRunning          bool
+	maxInterpolatedCount  = 3
+	updatePauseInMinutes  = 1
 )
 
 type Times struct {
-	DryerMinutes          int `json:"dryer_minutes"`           // done: -1, off: -2
-	WashingMachineMinutes int `json:"washing_machine_minutes"` // done: -1, off: -2
+	DryerMinutes                    int `json:"dryer_minutes"` // done: -1, off: -2
+	DryerInterpolatedCount          int `json:"-"`
+	WashingMachineMinutes           int `json:"washing_machine_minutes"` // done: -1, off: -2
+	WashingMachineInterpolatedCount int `json:"-"`
 }
 
 func init() {
@@ -33,7 +37,7 @@ func init() {
 			log.Println(fmt.Sprintf("globalTimes: %+v", globalTimes))
 			globalTimesMutex.RUnlock()
 			// Refresh every minute
-			time.Sleep(1 * time.Minute)
+			time.Sleep(time.Duration(updatePauseInMinutes) * time.Minute)
 		}
 	}()
 }
@@ -66,18 +70,35 @@ func refreshTimes() {
 			log.Println("Error while getting dryer image:", err)
 			return
 		}
+		interpolated := false
 		digits, err := RecognizeDryer(image)
 		if err != nil {
-			if err == errorMachineDone {
+			if err == errorNoDigits {
+				// Off
+			} else if err == errorMachineDone {
 				times.DryerMinutes = -1
 			} else {
 				log.Println("Error while recognizing dryer digits:", err)
+				// Interpolate if possible
+				globalTimesMutex.RLock()
+				minutesBefore := globalTimes.DryerMinutes
+				interpolatedCount := globalTimes.DryerInterpolatedCount
+				globalTimesMutex.RUnlock()
+				if interpolatedCount < maxInterpolatedCount && minutesBefore > updatePauseInMinutes {
+					times.DryerMinutes = minutesBefore - updatePauseInMinutes
+					times.DryerInterpolatedCount = interpolatedCount + 1
+					interpolated = true
+				}
 			}
 		} else if len(digits) == 3 {
+			// Compute minutes from digits
 			times.DryerMinutes = 0
 			times.DryerMinutes += 60 * digits[0]
 			times.DryerMinutes += 10 * digits[1]
 			times.DryerMinutes += digits[2]
+		}
+		if !interpolated {
+			times.WashingMachineInterpolatedCount = 0
 		}
 	}()
 
@@ -90,18 +111,35 @@ func refreshTimes() {
 			log.Println("Error while getting washing machine image:", err)
 			return
 		}
+		interpolated := false
 		digits, err := RecognizeWashingMachine(image)
 		if err != nil {
-			if err == errorMachineDone {
+			if err == errorNoDigits {
+				// Off
+			} else if err == errorMachineDone {
 				times.WashingMachineMinutes = -1
 			} else {
 				log.Println("Error while recognizing washing machine digits:", err)
+				// Interpolate if possible
+				globalTimesMutex.RLock()
+				minutesBefore := globalTimes.WashingMachineMinutes
+				interpolatedCount := globalTimes.WashingMachineInterpolatedCount
+				globalTimesMutex.RUnlock()
+				if interpolatedCount < maxInterpolatedCount && minutesBefore > updatePauseInMinutes {
+					times.WashingMachineMinutes = minutesBefore - updatePauseInMinutes
+					times.WashingMachineInterpolatedCount = interpolatedCount + 1
+					interpolated = true
+				}
 			}
 		} else if len(digits) == 3 {
+			// Compute minutes from digits
 			times.WashingMachineMinutes = 0
 			times.WashingMachineMinutes += 60 * digits[0]
 			times.WashingMachineMinutes += 10 * digits[1]
 			times.WashingMachineMinutes += digits[2]
+		}
+		if !interpolated {
+			times.WashingMachineInterpolatedCount = 0
 		}
 	}()
 
