@@ -64,7 +64,7 @@ func getStatus(esp32CamAddress string) (*CameraStatus, error) {
 }
 
 func setStatus(key, value string, esp32CamAddress string) error {
-	log.Println("Setting camera status")
+	log.Println("Setting camera status for", esp32CamAddress)
 	// Set status
 	resp, err := httpClient.Get(esp32CamAddress + "/control?var=" + key + "&val=" + value)
 	if err != nil {

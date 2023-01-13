@@ -46,6 +46,7 @@ var (
 	}
 	whiteThreshold   = 0.7
 	errorMachineDone = errors.New("machine done")
+	errorNoDigits    = errors.New("no digits found")
 )
 
 func RecognizeDryer(imageBytes []byte) ([]int, error) {
@@ -147,6 +148,16 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	defer destThreshold.Close()
 	gocv.Threshold(destGray, &destThreshold, minThreshold, 255, gocv.ThresholdBinary)
 
+	if utils.CameraDebug {
+		window := gocv.NewWindow("Hello")
+		for {
+			window.IMShow(destThreshold)
+			if window.WaitKey(1) >= 0 {
+				break
+			}
+		}
+	}
+
 	// Get edges
 	destEdge := gocv.NewMat()
 	defer destEdge.Close()
@@ -165,6 +176,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	var digits []digit
 	for index, points := range points {
 		if index > 2 {
+			// TODO: Check if this is the second part of a disconnected "1"
 			break
 		}
 		c := gocv.NewPointVectorFromPoints(points)
@@ -178,6 +190,9 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	sort.Slice(digits, func(i, j int) bool {
 		return digits[i].xPos < digits[j].xPos
 	})
+	if len(digits) == 0 {
+		return nil, errorNoDigits
+	}
 	if len(digits) != 3 {
 		return nil, errors.New("found wrong number of digits:" + strconv.Itoa(len(digits)))
 	}
