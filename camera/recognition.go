@@ -162,9 +162,49 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	destEdge := gocv.NewMat()
 	defer destEdge.Close()
 	gocv.Canny(destThreshold, &destEdge, 50, 200)
+	if utils.CameraDebug {
+		window := gocv.NewWindow("Hello")
+		for {
+			window.IMShow(destEdge)
+			if window.WaitKey(1) >= 0 {
+				break
+			}
+		}
+	}
+
+	// Dilate edges
+	destDilate := gocv.NewMat()
+	defer destDilate.Close()
+	kernelDilate := gocv.GetStructuringElement(gocv.MorphRect, image.Pt(3, 3))
+	defer kernelDilate.Close()
+	gocv.Dilate(destEdge, &destDilate, kernelDilate)
+	if utils.CameraDebug {
+		window := gocv.NewWindow("Hello")
+		for {
+			window.IMShow(destDilate)
+			if window.WaitKey(1) >= 0 {
+				break
+			}
+		}
+	}
+
+	destErode := gocv.NewMat()
+	defer destErode.Close()
+	kernelErode := gocv.GetStructuringElement(gocv.MorphRect, image.Pt(3, 3))
+	defer kernelErode.Close()
+	gocv.Erode(destDilate, &destErode, kernelErode)
+	if utils.CameraDebug {
+		window := gocv.NewWindow("Hello")
+		for {
+			window.IMShow(destErode)
+			if window.WaitKey(1) >= 0 {
+				break
+			}
+		}
+	}
 
 	// Get contours
-	contours := gocv.FindContours(destEdge, gocv.RetrievalExternal, gocv.ChainApproxSimple)
+	contours := gocv.FindContours(destErode, gocv.RetrievalExternal, gocv.ChainApproxSimple)
 	defer contours.Close()
 	if contours.IsNil() {
 		return nil, errors.New("could not find any contous")
