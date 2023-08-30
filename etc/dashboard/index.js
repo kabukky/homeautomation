@@ -210,6 +210,9 @@ function showWeather(data) {
     var currentTemperatureContainer = document.getElementById("weather-current-icon");
     currentTemperatureContainer.innerHTML = '<i class="wi '+determineIconPrefix(sunset, sunrise, new Date(data.current.time))+data.current.openweathermap_id+'"></i>'
 
+    var currentUVIndexContainer = document.getElementById("weather-current-uv-index");
+    currentUVIndexContainer.innerHTML = 'UVI&nbsp;&nbsp;<i class="wi wi-day-sunny"></i>&nbsp;'+Math.round(data.current.uv_index);
+
     var ctx = document.getElementById("temperature-chart");
     var chartData = {
         labels: [],
