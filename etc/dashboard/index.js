@@ -264,27 +264,54 @@ function showWeather(data) {
     imagesContainer.innerHTML = '';
     var precipitationProbabilityContainer = document.getElementById("temperature-chart-precipitation-probability");
     precipitationProbabilityContainer.innerHTML = '';
+    var uviContainer = document.getElementById("temperature-chart-uv-index");
+    uviContainer.innerHTML = '';
 
     var hasPrecipitation = false;
+    var precipitationIndicesToDisplay = [];
     data.forecast.forEach(function (element, index) {
         if (index < maxHours) {
             if (element.precipitation_amount > 0) {
                 hasPrecipitation = true;
             }
             var date = new Date(element.time);
-            chartData.datasets[0].data.push(element.temperature_celsius);
+            chartData.datasets[0].data.push(Math.round(element.temperature_celsius));
             chartData.datasets[1].data.push(element.precipitation_amount);
+
+            if (element.precipitation_amount == 0) {
+                // Never display 0
+            } else if (!precipitationIndicesToDisplay.includes(index-1) && !precipitationIndicesToDisplay.includes(index-2)) {
+                // Last two indices were not be displayed
+                // Definitely display this one
+                precipitationIndicesToDisplay.push(index);
+            } else if (index+1 < data.forecast.length && data.forecast[index+1].precipitation_amount > element.precipitation_amount) {
+                // Next one is bigger, do not diplay 
+            } else if (index > 0 && precipitationIndicesToDisplay.includes(index-1)) {
+                // Last one was displayed. Do not display this one
+                if (element.precipitation_amount > data.forecast[index-1].precipitation_amount) {
+                    // Except this one is bigger, so display this one instead
+                    precipitationIndicesToDisplay = precipitationIndicesToDisplay.filter(function(e) { return e != index-1 });
+                    precipitationIndicesToDisplay.push(index);
+                }
+            } else {
+                // Display
+                precipitationIndicesToDisplay.push(index);
+            }
+
             chartData.labels.push(moment(date).format('HH:mm'));
             imagesContainer.innerHTML += '<div class="col p-0 text-center"><i class="wi '+determineIconPrefix(sunset, sunrise, date)+element.openweathermap_id+'"></i></div>';
             precipitationProbabilityContainer.innerHTML += '<div class="col p-0 text-center"><i class="wi wi-umbrella"></i><br>'+Math.round(element.precipitation_probability*100)+'%</div>';
+            var uvIndexString = '<i class="wi wi-day-sunny"></i>'+Math.round(element.uv_index);
+            if (Math.round(element.uv_index) < 1) {
+                uvIndexString = ""
+            }
+            uviContainer.innerHTML += '<div class="col p-0 text-center">'+uvIndexString+'</div>';
         }
     });
 
     if (!hasPrecipitation) {
         chartData.datasets[1].data = [];
     }
-
-    var lastPrecipitationDisplayed = false
 
     var chartOptions = {
         layout: {
@@ -327,24 +354,10 @@ function showWeather(data) {
                     if (context.datasetIndex == 0) {
                         return "auto";
                     }
-                    var value = chartData.datasets[context.datasetIndex].data[context.dataIndex];
-                    if (value == 0) {
-                        lastPrecipitationDisplayed = false;
-                        return false;
-                    }
-                    if (lastPrecipitationDisplayed) {
-                        // Never display two labels next to each other
-                        lastPrecipitationDisplayed = false;
-                        return false;
-                    } else {
-                        // Do not display if next label is higher, but only if label before was not displayed
-                        if (context.dataIndex-1 >= 0 && chartData.datasets[context.datasetIndex].data[context.dataIndex-1] == 0 && context.dataIndex+1 < chartData.datasets[context.datasetIndex].data.length && chartData.datasets[context.datasetIndex].data[context.dataIndex+1] > value) {
-                            lastPrecipitationDisplayed = false;
-                            return false;
-                        }
-                        lastPrecipitationDisplayed = true;
+                    if (precipitationIndicesToDisplay.includes(context.dataIndex)) {
                         return true;
                     }
+                    return false;
                 }
             },
             tooltip: {

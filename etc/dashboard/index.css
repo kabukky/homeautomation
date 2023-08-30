@@ -42,7 +42,11 @@ body {
 }
 
 #temperature-chart-precipitation-probability {
-    font-size: 0.9em !important;
+    font-size: 0.8em !important;
+}
+
+#temperature-chart-uv-index {
+    font-size: 0.8em !important;
 }
 
 #main-temp-degrees {

@@ -23,6 +23,7 @@ type OpenWeatherMapData struct {
 	Sunrise                  int64                   `json:"sunrise"`
 	TemperatureCelsius       float32                 `json:"temp"`
 	PrecipitationProbability float32                 `json:"pop"`
+	UVIndex                  float32                 `json:"uvi"`
 	Rain                     OpenWeatherMapRain      `json:"rain"`
 	Weather                  []OpenWeatherMapWeather `json:"weather"`
 }
@@ -50,6 +51,7 @@ type Weather struct {
 	TemperatureCelsius       float32    `json:"temperature_celsius"`
 	PrecipitationProbability float32    `json:"precipitation_probability"`
 	PrecipitationAmount      float32    `json:"precipitation_amount"`
+	UVIndex                  float32    `json:"uv_index"`
 	Icon                     string     `json:"icon"`
 	OWMID                    int        `json:"openweathermap_id"`
 }
@@ -136,6 +138,7 @@ func convertOpenWeatherMapData(owpData *OpenWeatherMapData) *Weather {
 		TemperatureCelsius:       owpData.TemperatureCelsius,
 		PrecipitationProbability: owpData.PrecipitationProbability,
 		PrecipitationAmount:      owpData.Rain.OneHour,
+		UVIndex:                  owpData.UVIndex,
 		Icon:                     icon,
 		OWMID:                    id,
 	}
