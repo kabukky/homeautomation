@@ -1,6 +1,7 @@
 var temperatureChart = null;
 var calendar = null;
 const maxHours = 16; // Only show forecast a few hours into the future
+const temperatureOffset = 8; // Offset for showing temperatures on the chart
 document.fonts.onloadingdone = () => {
     if (temperatureChart) {
         temperatureChart.update();
@@ -114,8 +115,6 @@ function showCalendar(data) {
     // Display HTML
     var calendarContainers = [document.getElementById("cal-col-1"), document.getElementById("cal-col-2"), document.getElementById("cal-col-3")];
     var containerIndex = 0;
-    var rowIndex = 0;
-    const maxRowsPerColumn = 7;
     calendarContainers.forEach(function (container) {
         container.innerHTML = '';
     });
@@ -231,7 +230,7 @@ function showWeather(data) {
                     size: 18,
                 },
                 formatter: function(value, context) {
-                    return Math.round(value) + "°";
+                    return Math.round(value) - temperatureOffset + "°";
                 }
             },
             data: []
@@ -272,13 +271,17 @@ function showWeather(data) {
 
     var hasPrecipitation = false;
     var precipitationIndicesToDisplay = [];
+    var maxForecastTemperature = -100;
     data.forecast.forEach(function (element, index) {
         if (index < maxHours) {
             if (element.precipitation_amount > 0) {
                 hasPrecipitation = true;
             }
+            if (element.temperature_celsius > maxForecastTemperature) {
+                maxForecastTemperature = element.temperature_celsius
+            }
             var date = new Date(element.time);
-            chartData.datasets[0].data.push(Math.round(element.temperature_celsius));
+            chartData.datasets[0].data.push(Math.round(element.temperature_celsius) + temperatureOffset);
             chartData.datasets[1].data.push(element.precipitation_amount);
 
             if (element.precipitation_amount == 0) {
@@ -337,7 +340,8 @@ function showWeather(data) {
             yAxis: {
                 ticks: {
                     display: false
-                }
+                },
+                max: maxForecastTemperature + temperatureOffset + 1,
             },
             xAxis: {
                 ticks: {
@@ -371,6 +375,10 @@ function showWeather(data) {
             }
         }
     };
+
+    if (!hasPrecipitation) {
+        chartOptions.scales.yAxis.min = 0;
+    }
 
     if (temperatureChart) {
         temperatureChart.destroy();
