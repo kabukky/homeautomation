@@ -204,7 +204,7 @@ function showWeather(data) {
 
     // Current
     var currentTemperatureContainer = document.getElementById("weather-current-temperature");
-    currentTemperatureContainer.innerHTML = data.current.temperature_celsius.toFixed() + '<sup id="main-temp-degrees">°C</sup>';
+    currentTemperatureContainer.innerHTML = data.current.temperature_celsius.toFixed().replace(/^-0$/, "0") + '<sup id="main-temp-degrees">°C</sup>';
 
     var currentTemperatureContainer = document.getElementById("weather-current-icon");
     currentTemperatureContainer.innerHTML = '<i class="wi '+determineIconPrefix(sunset, sunrise, new Date(data.current.time))+data.current.openweathermap_id+'"></i>'
@@ -230,7 +230,7 @@ function showWeather(data) {
                     size: 18,
                 },
                 formatter: function(value, context) {
-                    return Math.round(value) - temperatureOffset + "°";
+                    return (Math.round(value) - temperatureOffset + "°").replace(/^-0$/, "0");
                 }
             },
             data: []
