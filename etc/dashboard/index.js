@@ -272,6 +272,7 @@ function showWeather(data) {
     var hasPrecipitation = false;
     var precipitationIndicesToDisplay = [];
     var maxForecastTemperature = -100;
+    var minForecastTemperature = 100;
     data.forecast.forEach(function (element, index) {
         if (index < maxHours) {
             if (element.precipitation_amount > 0) {
@@ -279,6 +280,9 @@ function showWeather(data) {
             }
             if (element.temperature_celsius > maxForecastTemperature) {
                 maxForecastTemperature = element.temperature_celsius
+            }
+            if (element.temperature_celsius < minForecastTemperature) {
+                minForecastTemperature = element.temperature_celsius
             }
             var date = new Date(element.time);
             chartData.datasets[0].data.push(Math.round(element.temperature_celsius) + temperatureOffset);
@@ -377,7 +381,7 @@ function showWeather(data) {
     };
 
     if (!hasPrecipitation) {
-        chartOptions.scales.yAxis.min = 0;
+        chartOptions.scales.yAxis.min = minForecastTemperature - 1;
     }
 
     if (temperatureChart) {
