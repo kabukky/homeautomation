@@ -19,7 +19,7 @@ type CameraStatus struct {
 	Quality   int `json:"quality"`
 }
 
-func getImage(esp32CamAddress string) ([]byte, error) {
+func GetImage(esp32CamAddress string) ([]byte, error) {
 	// Check settings
 	settings, err := getStatus(esp32CamAddress)
 	if err != nil {
