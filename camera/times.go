@@ -16,7 +16,7 @@ var (
 	washingMachineRunning bool
 	dryerRunning          bool
 	maxInterpolatedCount  = 3
-	updatePauseInMinutes  = 1
+	updatePauseInMinutes  = 2
 )
 
 type Times struct {
@@ -36,7 +36,7 @@ func init() {
 			globalTimesMutex.RLock()
 			log.Println(fmt.Sprintf("globalTimes: %+v", globalTimes))
 			globalTimesMutex.RUnlock()
-			// Refresh every minute
+			// Refresh every x minutes
 			time.Sleep(time.Duration(updatePauseInMinutes) * time.Minute)
 		}
 	}()
@@ -65,7 +65,7 @@ func refreshTimes() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		image, err := getImage(utils.CameraHostDryer)
+		image, err := GetImage(utils.CameraHostDryer)
 		if err != nil {
 			log.Println("Error while getting dryer image:", err)
 			return
@@ -106,7 +106,7 @@ func refreshTimes() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		image, err := getImage(utils.CameraHostWashingMachine)
+		image, err := GetImage(utils.CameraHostWashingMachine)
 		if err != nil {
 			log.Println("Error while getting washing machine image:", err)
 			return

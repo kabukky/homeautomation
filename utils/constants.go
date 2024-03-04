@@ -22,6 +22,7 @@ var (
 	CameraHostDryer          = envVarOrDefault("CAMERA_HOST_DRYER", "http://esp32-cc7394")
 	CameraHostWashingMachine = envVarOrDefault("CAMERA_HOST_WASHING_MACHINE", "http://esp32-7640f1")
 	CameraDebug, _           = strconv.ParseBool(envVarOrDefault("CAMERA_DEBUG", "false"))
+	CameraDebugViaNetwork, _ = strconv.ParseBool(envVarOrDefault("CAMERA_DEBUG_VIA_NETWORK", "false"))
 	CameraDebugFilename      = envVarOrDefault("CAMERA_DEBUG_FILENAME", "capture.jpg")
 
 	PushoverToken   = mustEnvVar("PUSHOVER_TOKEN")
