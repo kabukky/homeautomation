@@ -62,7 +62,7 @@ type WeatherCacheEntry struct {
 }
 
 var (
-	apiURL    = "https://api.openweathermap.org/data/2.5/onecall?lat=%v&lon=%v&exclude=minutely&units=metric&lang=de&appid=%s"
+	apiURL    = "https://api.openweathermap.org/data/3.0/onecall?lat=%v&lon=%v&exclude=minutely&units=metric&lang=de&appid=%s"
 	httClient = http.Client{
 		Timeout: 30 * time.Second,
 	}
