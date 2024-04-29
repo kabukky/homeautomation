@@ -62,7 +62,7 @@ type WeatherCacheEntry struct {
 }
 
 var (
-	apiURL    = "https://api.openweathermap.org/data/3.0/onecall?lat=%v&lon=%v&exclude=minutely&units=metric&lang=de&appid=%s"
+	apiURL    = "https://api.openweathermap.org/data/2.5/onecall?lat=%v&lon=%v&exclude=minutely&units=metric&lang=de&appid=%s"
 	httClient = http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -100,11 +100,14 @@ func Get(ctx context.Context) (*Data, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	// data, _ := io.ReadAll(resp.Body)
+	// log.Printf("owpResp: %+v\n", string(data))
 	var owpResp OpenWeatherMapResponse
 	err = json.NewDecoder(resp.Body).Decode(&owpResp)
 	if err != nil {
 		return nil, err
 	}
+	// log.Printf("owpResp: %+v\n", owpResp)
 	var result Data
 	result.Current = convertOpenWeatherMapData(&owpResp.Current)
 	for _, hour := range owpResp.Hourly {
