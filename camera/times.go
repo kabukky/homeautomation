@@ -65,13 +65,13 @@ func refreshTimes() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		image, err := GetImage(utils.CameraHostDryer)
+		image, err := GetImageRtsp(utils.CameraHostDryer, utils.CameraUsername, utils.CameraPassword)
 		if err != nil {
 			log.Println("Error while getting dryer image:", err)
 			return
 		}
 		interpolated := false
-		digits, err := RecognizeDryer(image)
+		digits, err := RecognizeDryer(*image)
 		if err != nil {
 			if err == errorNoDigits {
 				// Off

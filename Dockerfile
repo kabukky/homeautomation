@@ -1,4 +1,4 @@
-FROM gocv/opencv:4.7.0
+FROM gocv/opencv:4.11.0
 
 WORKDIR /app
 COPY . .
