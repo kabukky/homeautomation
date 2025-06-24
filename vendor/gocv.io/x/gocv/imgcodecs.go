@@ -135,7 +135,6 @@ const (
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56
-//
 func IMRead(name string, flags IMReadFlag) Mat {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
@@ -143,11 +142,62 @@ func IMRead(name string, flags IMReadFlag) Mat {
 	return newMat(C.Image_IMRead(cName, C.int(flags)))
 }
 
+// IMReadMulti reads multi-page image from a file into a []Mat.
+// The flags param is one of the IMReadFlag flags.
+// If the image cannot be read (because of missing file, improper permissions,
+// unsupported or invalid format), the function returns an empty []Mat.
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html#gaaeb5e219c706fd6aa1ec6cf17b172080
+func IMReadMulti(name string, flags IMReadFlag) []Mat {
+	var mats []Mat
+	multiRead := C.struct_Mats{}
+
+	cName := C.CString(name)
+	defer C.free(unsafe.Pointer(cName))
+
+	multiRead = C.Image_IMReadMulti(cName, C.int(flags))
+	defer C.Mats_Close(multiRead)
+
+	if multiRead.length > C.int(0) {
+		mats = make([]Mat, multiRead.length)
+		for i := 0; i < int(multiRead.length); i++ {
+			mats[i].p = C.Mats_get(multiRead, C.int(i))
+		}
+	}
+	return mats
+}
+
+// IMReadMulti reads multi-page image from a file into a []Mat.
+// The flags param is one of the IMReadFlag flags.
+// If the image cannot be read (because of missing file, improper permissions,
+// unsupported or invalid format), the function returns an empty []Mat.
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html#ga55e88dc40b65807cfbe2c62d27f7fdf9
+func IMReadMulti_WithParams(name string, start int, count int, flags IMReadFlag) []Mat {
+	var mats []Mat
+	multiRead := C.struct_Mats{}
+
+	cName := C.CString(name)
+	defer C.free(unsafe.Pointer(cName))
+
+	multiRead = C.Image_IMReadMulti_WithParams(cName, C.int(start), C.int(count), C.int(flags))
+	defer C.Mats_Close(multiRead)
+
+	if multiRead.length > C.int(0) {
+		mats = make([]Mat, multiRead.length)
+		for i := 0; i < int(multiRead.length); i++ {
+			mats[i].p = C.Mats_get(multiRead, C.int(i))
+		}
+	}
+	return mats
+}
+
 // IMWrite writes a Mat to an image file.
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d4/da8/group__imgcodecs.html#gabbc7ef1aa2edfaa87772f1202d67e0ce
-//
 func IMWrite(name string, img Mat) bool {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
@@ -160,7 +210,6 @@ func IMWrite(name string, img Mat) bool {
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d4/da8/group__imgcodecs.html#gabbc7ef1aa2edfaa87772f1202d67e0ce
-//
 func IMWriteWithParams(name string, img Mat, params []int) bool {
 	cName := C.CString(name)
 	defer C.free(unsafe.Pointer(cName))
@@ -196,14 +245,13 @@ const (
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga461f9ac09887e47797a54567df3b8b63
-//
 func IMEncode(fileExt FileExt, img Mat) (buf *NativeByteBuffer, err error) {
 	cfileExt := C.CString(string(fileExt))
 	defer C.free(unsafe.Pointer(cfileExt))
 
 	buffer := newNativeByteBuffer()
-	C.Image_IMEncode(cfileExt, img.Ptr(), buffer.nativePointer())
-	return buffer, nil
+	res := C.Image_IMEncode(cfileExt, img.Ptr(), buffer.nativePointer())
+	return buffer, OpenCVResult(res)
 }
 
 // IMEncodeWithParams encodes an image Mat into a memory buffer.
@@ -211,11 +259,11 @@ func IMEncode(fileExt FileExt, img Mat) (buf *NativeByteBuffer, err error) {
 // using the image format passed in in the form of a file extension string.
 //
 // Usage example:
-//  buffer, err := gocv.IMEncodeWithParams(gocv.JPEGFileExt, img, []int{gocv.IMWriteJpegQuality, quality})
+//
+//	buffer, err := gocv.IMEncodeWithParams(gocv.JPEGFileExt, img, []int{gocv.IMWriteJpegQuality, quality})
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga461f9ac09887e47797a54567df3b8b63
-//
 func IMEncodeWithParams(fileExt FileExt, img Mat, params []int) (buf *NativeByteBuffer, err error) {
 	cfileExt := C.CString(string(fileExt))
 	defer C.free(unsafe.Pointer(cfileExt))
@@ -231,8 +279,8 @@ func IMEncodeWithParams(fileExt FileExt, img Mat, params []int) (buf *NativeByte
 	paramsVector.length = (C.int)(len(cparams))
 
 	b := newNativeByteBuffer()
-	C.Image_IMEncode_WithParams(cfileExt, img.Ptr(), paramsVector, b.nativePointer())
-	return b, nil
+	res := C.Image_IMEncode_WithParams(cfileExt, img.Ptr(), paramsVector, b.nativePointer())
+	return b, OpenCVResult(res)
 }
 
 // IMDecode reads an image from a buffer in memory.
@@ -242,11 +290,25 @@ func IMEncodeWithParams(fileExt FileExt, img Mat, params []int) (buf *NativeByte
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga26a67788faa58ade337f8d28ba0eb19e
-//
 func IMDecode(buf []byte, flags IMReadFlag) (Mat, error) {
 	data, err := toByteArray(buf)
 	if err != nil {
 		return Mat{}, err
 	}
-	return newMat(C.Image_IMDecode(*data, C.int(flags))), nil
+	return newMat(C.Image_IMDecode(*data, C.int(flags))), LastExceptionError()
+}
+
+// IMDecodeIntoMat reads an image from a buffer in memory into a matrix.
+// The function IMDecodeIntoMat reads an image from the specified buffer in memory.
+// If the buffer is too short or contains invalid data, the function
+// returns an error
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html#ga5a0acefe5cbe0a81e904e452ec7ca733
+func IMDecodeIntoMat(buf []byte, flags IMReadFlag, dest *Mat) error {
+	data, err := toByteArray(buf)
+	if err != nil {
+		return err
+	}
+	return OpenCVResult(C.Image_IMDecodeIntoMat(*data, C.int(flags), dest.p))
 }

@@ -49,15 +49,7 @@ var (
 	errorNoDigits    = errors.New("no digits found")
 )
 
-func RecognizeDryer(imageBytes []byte) ([]int, error) {
-	img, _, err := image.Decode(bytes.NewReader(imageBytes))
-	if err != nil {
-		return nil, err
-	}
-	mat, err := gocv.ImageToMatRGB(img)
-	if err != nil {
-		return nil, err
-	}
+func RecognizeDryer(mat gocv.Mat) ([]int, error) {
 	defer mat.Close()
 
 	// Rotate
@@ -67,12 +59,12 @@ func RecognizeDryer(imageBytes []byte) ([]int, error) {
 
 	// Coordinates for perspective transform
 	displayCoords := []image.Point{
-		image.Point{834, 190}, // top-left
-		image.Point{834, 224}, // bottom-left
-		image.Point{915, 217}, // bottom-right
-		image.Point{918, 178}, // top-right
+		image.Point{1170, 940},  // top-left
+		image.Point{1160, 1000}, // bottom-left
+		image.Point{1273, 990},  // bottom-right
+		image.Point{1275, 935},  // top-right
 	}
-	return recognizeDigits(&rotated, displayCoords, 210)
+	return recognizeDigits(&rotated, displayCoords, 250)
 }
 
 func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {

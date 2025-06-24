@@ -3,12 +3,26 @@ package gocv
 /*
 #include <stdlib.h>
 #include "highgui_gocv.h"
+
+void go_onmouse_dispatcher(int event, int x, int y, int flags, void *userdata);
 */
 import "C"
 import (
 	"image"
 	"runtime"
 	"unsafe"
+)
+
+type MouseHandlerFunc func(event int, x int, y int, flags int, userdata interface{})
+
+type mouseHandlerInfo struct {
+	c_name_ptr *C.char
+	fn         MouseHandlerFunc
+	userdata   interface{}
+}
+
+var (
+	onMouseHandlers = map[string]mouseHandlerInfo{}
 )
 
 // Window is a wrapper around OpenCV's "HighGUI" named windows.
@@ -19,7 +33,6 @@ import (
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d7/dfc/group__highgui.html
-//
 type Window struct {
 	name string
 	open bool
@@ -29,7 +42,6 @@ type Window struct {
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d7/dfc/group__highgui.html#ga5afdf8410934fd099df85c75b2e0888b
-//
 func NewWindow(name string) *Window {
 	runtime.LockOSThread()
 
@@ -45,10 +57,17 @@ func NewWindow(name string) *Window {
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d7/dfc/group__highgui.html#ga851ccdd6961022d1d5b4c4f255dbab34
-//
 func (w *Window) Close() error {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
+
+	mcbInfo, exists := onMouseHandlers[w.name]
+	if exists {
+		mcbInfo.fn = nil
+		mcbInfo.userdata = nil
+		C.free(unsafe.Pointer(mcbInfo.c_name_ptr))
+		delete(onMouseHandlers, w.name)
+	}
 
 	C.Window_Close(cName)
 	w.open = false
@@ -109,7 +128,6 @@ const (
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#gaaf9504b8f9cf19024d9d44a14e461656
-//
 func (w *Window) GetWindowProperty(flag WindowPropertyFlag) float64 {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -121,27 +139,25 @@ func (w *Window) GetWindowProperty(flag WindowPropertyFlag) float64 {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga66e4a6db4d4e06148bcdfe0d70a5df27
-//
-func (w *Window) SetWindowProperty(flag WindowPropertyFlag, value WindowFlag) {
+func (w *Window) SetWindowProperty(flag WindowPropertyFlag, value WindowFlag) error {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
 
-	C.Window_SetProperty(cName, C.int(flag), C.double(value))
+	return OpenCVResult(C.Window_SetProperty(cName, C.int(flag), C.double(value)))
 }
 
 // SetWindowTitle updates window title.
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga56f8849295fd10d0c319724ddb773d96
-//
-func (w *Window) SetWindowTitle(title string) {
+func (w *Window) SetWindowTitle(title string) error {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
 
 	cTitle := C.CString(title)
 	defer C.free(unsafe.Pointer(cTitle))
 
-	C.Window_SetTitle(cName, cTitle)
+	return OpenCVResult(C.Window_SetTitle(cName, cTitle))
 }
 
 // IMShow displays an image Mat in the specified window.
@@ -150,12 +166,11 @@ func (w *Window) SetWindowTitle(title string) {
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d7/dfc/group__highgui.html#ga453d42fe4cb60e5723281a89973ee563
-//
-func (w *Window) IMShow(img Mat) {
+func (w *Window) IMShow(img Mat) error {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
 
-	C.Window_IMShow(cName, img.p)
+	return OpenCVResult(C.Window_IMShow(cName, img.p))
 }
 
 // WaitKey waits for a pressed key.
@@ -165,33 +180,59 @@ func (w *Window) IMShow(img Mat) {
 //
 // For further details, please see:
 // http://docs.opencv.org/master/d7/dfc/group__highgui.html#ga5628525ad33f52eab17feebcfba38bd7
-//
 func (w *Window) WaitKey(delay int) int {
 	return int(C.Window_WaitKey(C.int(delay)))
+}
+
+// WaitKeyEx Similar to waitKey, but returns full key code.
+// Note
+// Key code is implementation specific and depends on used backend: QT/GTK/Win32/etc
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d7/dfc/group__highgui.html#gafa15c0501e0ddd90918f17aa071d3dd0
+func (w *Window) WaitKeyEx(delay int) int {
+	return int(C.Window_WaitKey(C.int(delay)))
+}
+
+// PollKey polls for a pressed key.
+// The function pollKey polls for a key event without waiting.
+// It returns the code of the pressed key or -1 if no key was pressed since
+// the last invocation. To wait until a key was pressed, use waitKey.
+//
+// The functions waitKey and pollKey are the only methods in HighGUI that can
+// fetch and handle GUI events, so one of them needs to be called periodically
+// for normal event processing unless HighGUI is used within an environment that
+// takes care of event processing.
+// The function only works if there is at least one HighGUI window created and
+// the window is active. If there are several HighGUI windows, any of them can
+// be active.
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d7/dfc/group__highgui.html#ga6d20fbd3100ec3badc1eaa653aff99d7
+func (w *Window) PollKey() int {
+	return int(C.Window_PollKey())
 }
 
 // MoveWindow moves window to the specified position.
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga8d86b207f7211250dbe6e28f76307ffb
-//
-func (w *Window) MoveWindow(x, y int) {
+func (w *Window) MoveWindow(x, y int) error {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
 
-	C.Window_Move(cName, C.int(x), C.int(y))
+	return OpenCVResult(C.Window_Move(cName, C.int(x), C.int(y)))
 }
 
 // ResizeWindow resizes window to the specified size.
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga9e80e080f7ef33f897e415358aee7f7e
-//
-func (w *Window) ResizeWindow(width, height int) {
+func (w *Window) ResizeWindow(width, height int) error {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
 
-	C.Window_Resize(cName, C.int(width), C.int(height))
+	return OpenCVResult(C.Window_Resize(cName, C.int(width), C.int(height)))
 }
 
 // SelectROI selects a Region Of Interest (ROI) on the given image.
@@ -203,7 +244,6 @@ func (w *Window) ResizeWindow(width, height int) {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga8daf4730d3adf7035b6de9be4c469af5
-//
 func (w *Window) SelectROI(img Mat) image.Rectangle {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -222,7 +262,6 @@ func (w *Window) SelectROI(img Mat) image.Rectangle {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga0f11fad74a6432b8055fb21621a0f893
-//
 func (w *Window) SelectROIs(img Mat) []image.Rectangle {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -256,7 +295,6 @@ func SelectROIs(name string, img Mat) []image.Rectangle {
 
 // WaitKey that is not attached to a specific Window.
 // Only use when no Window exists in your application, e.g. command line app.
-//
 func WaitKey(delay int) int {
 	return int(C.Window_WaitKey(C.int(delay)))
 }
@@ -271,7 +309,6 @@ type Trackbar struct {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#gaf78d2155d30b728fc413803745b67a9b
-//
 func (w *Window) CreateTrackbar(name string, max int) *Trackbar {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -288,7 +325,6 @@ func (w *Window) CreateTrackbar(name string, max int) *Trackbar {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#gaf78d2155d30b728fc413803745b67a9b
-//
 func (w *Window) CreateTrackbarWithValue(name string, value *int, max int) *Trackbar {
 	cName := C.CString(w.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -304,7 +340,6 @@ func (w *Window) CreateTrackbarWithValue(name string, value *int, max int) *Trac
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga122632e9e91b9ec06943472c55d9cda8
-//
 func (t *Trackbar) GetPos() int {
 	cName := C.CString(t.parent.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -319,7 +354,6 @@ func (t *Trackbar) GetPos() int {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga67d73c4c9430f13481fd58410d01bd8d
-//
 func (t *Trackbar) SetPos(pos int) {
 	cName := C.CString(t.parent.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -334,7 +368,6 @@ func (t *Trackbar) SetPos(pos int) {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#gabe26ffe8d2b60cc678895595a581b7aa
-//
 func (t *Trackbar) SetMin(pos int) {
 	cName := C.CString(t.parent.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -349,7 +382,6 @@ func (t *Trackbar) SetMin(pos int) {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d7/dfc/group__highgui.html#ga7e5437ccba37f1154b65210902fc4480
-//
 func (t *Trackbar) SetMax(pos int) {
 	cName := C.CString(t.parent.name)
 	defer C.free(unsafe.Pointer(cName))
@@ -358,4 +390,28 @@ func (t *Trackbar) SetMax(pos int) {
 	defer C.free(unsafe.Pointer(tName))
 
 	C.Trackbar_SetMax(cName, tName, C.int(pos))
+}
+
+//export go_onmouse_dispatcher
+func go_onmouse_dispatcher(event C.int, x C.int, y C.int, flags C.int, userdata unsafe.Pointer) {
+
+	c_winname := (*C.char)(unsafe.Pointer(userdata))
+	winName := C.GoString(c_winname)
+	info, exists := onMouseHandlers[winName]
+	if !exists {
+		return
+	}
+	info.fn(int(event), int(x), int(y), int(flags), info.userdata)
+}
+
+func (w *Window) SetMouseHandler(onMOuse MouseHandlerFunc, userdata interface{}) {
+	c_winname := C.CString(w.name)
+
+	onMouseHandlers[w.name] = mouseHandlerInfo{
+		c_name_ptr: c_winname,
+		fn:         onMOuse,
+		userdata:   userdata,
+	}
+
+	C.Window_SetMouseCallback(c_winname, C.mouse_callback(C.go_onmouse_dispatcher))
 }

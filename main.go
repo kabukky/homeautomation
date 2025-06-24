@@ -2,31 +2,30 @@ package main
 
 import (
 	"log"
-	"os"
 	"runtime"
 
 	"github.com/kabukky/homeautomation/camera"
 	"github.com/kabukky/homeautomation/server"
 	"github.com/kabukky/homeautomation/utils"
+	"gocv.io/x/gocv"
 )
 
 func main() {
 	if utils.CameraDebug {
 		runtime.LockOSThread()
-		var image []byte
+		var image *gocv.Mat
 		var err error
 		if utils.CameraDebugViaNetwork {
-			image, err = camera.GetImage(utils.CameraHostDryer)
+			image, err = camera.GetImageRtsp(utils.CameraHostDryer, utils.CameraUsername, utils.CameraPassword)
 			if err != nil {
 				log.Fatalln(err)
 			}
 		} else {
-			image, err = os.ReadFile(utils.CameraDebugFilename)
-			if err != nil {
-				log.Fatalln(err)
-			}
+			// Removed this with Rtsp support.
+			// TODO: Read gocv.Mat from image file.
+			log.Fatalln("From image not implemented yet")
 		}
-		digits, err := camera.RecognizeDryer(image)
+		digits, err := camera.RecognizeDryer(*image)
 		if err != nil {
 			log.Fatalln(err)
 		}
