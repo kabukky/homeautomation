@@ -19,7 +19,7 @@ var (
 
 	GoogleCalendarIDs = strings.Split(envVarOrDefault("GOOGLE_CALENDAR_IDS", ""), ",")
 
-	CameraHostDryer          = envVarOrDefault("CAMERA_HOST_DRYER", "C210")
+	CameraHostDryer          = envVarOrDefault("CAMERA_HOST_DRYER", "C230")
 	CameraHostWashingMachine = envVarOrDefault("CAMERA_HOST_WASHING_MACHINE", "http://esp32-7640f1")
 	CameraUsername           = mustEnvVar("CAMERA_USERNAME")
 	CameraPassword           = mustEnvVar("CAMERA_PASSWORD")
