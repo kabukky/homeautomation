@@ -59,12 +59,12 @@ func RecognizeDryer(mat gocv.Mat) ([]int, error) {
 
 	// Coordinates for perspective transform
 	displayCoords := []image.Point{
-		image.Point{1170, 940},  // top-left
-		image.Point{1160, 1000}, // bottom-left
-		image.Point{1273, 990},  // bottom-right
-		image.Point{1275, 935},  // top-right
+		image.Point{1530, 1045}, // top-left
+		image.Point{1530, 1100}, // bottom-left
+		image.Point{1655, 1100}, // bottom-right
+		image.Point{1660, 1045}, // top-right
 	}
-	return recognizeDigits(&rotated, displayCoords, 250)
+	return recognizeDigits(&rotated, displayCoords, 210)
 }
 
 func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {
