@@ -98,7 +98,11 @@ func refreshTimes() {
 			times.DryerMinutes += digits[2]
 		}
 		if !interpolated {
-			times.WashingMachineInterpolatedCount = 0
+			times.DryerInterpolatedCount = 0
+		}
+		// Fix: Sometimes negative minutes are recognized
+		if times.DryerMinutes < -1 {
+			times.DryerMinutes = -1
 		}
 	}()
 
@@ -140,6 +144,10 @@ func refreshTimes() {
 		}
 		if !interpolated {
 			times.WashingMachineInterpolatedCount = 0
+		}
+		// Fix: Sometimes negative minutes are recognized
+		if times.WashingMachineMinutes < -1 {
+			times.WashingMachineMinutes = -1
 		}
 	}()
 
