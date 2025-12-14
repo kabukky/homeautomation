@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/disintegration/imaging"
 	"github.com/julienschmidt/httprouter"
 	"github.com/kabukky/homeautomation/calendar"
 	"github.com/kabukky/homeautomation/camera"
+	"github.com/kabukky/homeautomation/picture"
 	"github.com/kabukky/homeautomation/weather"
 )
 
@@ -31,6 +33,16 @@ func getCalendar(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func getCamera(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	times := camera.GetTimes()
 	respondWithJSON(w, times)
+}
+
+func getPicture(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	img, err := picture.GetPictureOfTheDay("test")
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "image/jpeg")
+	imaging.Encode(w, img, imaging.JPEG)
 }
 
 func respondWithError(w http.ResponseWriter, errMsg string, code int) {

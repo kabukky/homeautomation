@@ -1,6 +1,9 @@
 # cloud.google.com/go v0.97.0
 ## explicit; go 1.11
 cloud.google.com/go/compute/metadata
+# github.com/disintegration/imaging v1.6.2
+## explicit
+github.com/disintegration/imaging
 # github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
 ## explicit
 github.com/golang/groupcache/lru
@@ -19,6 +22,14 @@ github.com/googleapis/gax-go/v2/apierror/internal/proto
 # github.com/julienschmidt/httprouter v1.3.0
 ## explicit; go 1.7
 github.com/julienschmidt/httprouter
+# github.com/muesli/smartcrop v0.3.0
+## explicit
+github.com/muesli/smartcrop
+github.com/muesli/smartcrop/nfnt
+github.com/muesli/smartcrop/options
+# github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+## explicit
+github.com/nfnt/resize
 # go.opencensus.io v0.23.0
 ## explicit; go 1.13
 go.opencensus.io
@@ -40,6 +51,14 @@ go.opencensus.io/trace/tracestate
 # gocv.io/x/gocv v0.41.0
 ## explicit; go 1.21
 gocv.io/x/gocv
+# golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
+## explicit; go 1.12
+golang.org/x/image/bmp
+golang.org/x/image/ccitt
+golang.org/x/image/draw
+golang.org/x/image/math/f64
+golang.org/x/image/tiff
+golang.org/x/image/tiff/lzw
 # golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 ## explicit; go 1.17
 golang.org/x/net/context

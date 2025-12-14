@@ -29,6 +29,8 @@ var (
 
 	PushoverToken   = mustEnvVar("PUSHOVER_TOKEN")
 	PushoverUserKey = mustEnvVar("PUSHOVER_USER_KEY")
+
+	PicturesOfTheDayDirectory = envVarOrDefault("PICTURES_OF_THE_DAY_DIRECTORY", "/pictures/kids")
 )
 
 func mustEnvVar(name string) string {

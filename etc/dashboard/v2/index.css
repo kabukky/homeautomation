@@ -1,0 +1,90 @@
+@font-face {
+    font-family: "Lato";
+    font-style: normal;
+    font-weight: 700;
+    src:  url('lib/fonts/lato/Lato-Bold.ttf') format('truetype')
+}
+@font-face {
+    font-family: "Lato";
+    font-style: normal;
+    font-weight: 400;
+    src:  url('lib/fonts/lato/Lato-Regular.ttf') format('truetype')
+}
+@font-face {
+    font-family: "Lato";
+    font-style: normal;
+    font-weight: 300;
+    src:  url('lib/fonts/lato/Lato-Light.ttf') format('truetype')
+}
+
+body {
+    font-family: Lato;
+    font-weight: 700;
+    color: #000000;
+    background-color: #ffffff;
+}
+
+#date {
+    font-size: 2.5em;
+}
+
+#time {
+    font-size: 3.0em;
+}
+
+#weather-current-temperature {
+    font-size: 7.0em;
+}
+
+#weather-current-icon {
+    font-size: 7.0em;
+}
+
+#weather-current-uv-index {
+    font-size: 2.5em;
+}
+
+#temperature-chart-images .wi {
+    font-size: 2em;
+}
+
+#temperature-chart-precipitation-probability {
+    font-size: 1em !important;
+}
+
+#temperature-chart-uv-index {
+    font-size: 1em !important;
+}
+
+#main-temp-degrees {
+    font-size: 0.5em;
+}
+
+.date-calendar {
+    font-size: 1.4em;
+}
+
+.entry-calendar {
+    font-size: 1.2em;
+}
+
+.calendar-none {
+    font-size: 1.2em;
+}
+
+.appliance-timer {
+    font-size: 1.5em;
+}
+
+.appliance-symbol {
+    font-size: 3em;
+}
+
+hr {
+    border: none;
+    height: 1px !important;
+    /* Set the hr color */
+    color: #000000;  /* old IE */
+    background-color: #000000;  /* Modern Browsers */
+    opacity: 1 !important;
+}

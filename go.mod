@@ -5,7 +5,9 @@ go 1.21
 toolchain go1.24.3
 
 require (
+	github.com/disintegration/imaging v1.6.2
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/muesli/smartcrop v0.3.0
 	gocv.io/x/gocv v0.41.0
 	google.golang.org/api v0.60.0
 )
@@ -15,7 +17,9 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	go.opencensus.io v0.23.0 // indirect
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1 // indirect
 	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
