@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="lib/weather-icons/css/weather-icons.min.css" rel="stylesheet">
+        <link href="lib/materialdesign-icons/css/materialdesignicons.min.css" rel="stylesheet">
+        <link href="lib/fullcalendar/main.css" rel="stylesheet">
+        <link href="index.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container-fluid h-100 p-4">
+            <div class="row justify-content-center" id="image-landscape">
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col" id="cal-col-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <div class="row justify-content-center" id="image-portrait">
+                        <!-- <img class="pt-1" style="max-height:1100px; max-width:100%; width:auto;" id="custom-picture"/> -->
+                    </div>
+                    <div class="row">
+                        <div class="col-6 pt-4">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col" id="cal-col-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 pt-4">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col" id="cal-col-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+        <script src="lib/moment/moment-with-locales.min.js"></script>
+        <script src="lib/chart/chart.min.js"></script>
+        <script src="lib/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js"></script>
+        <script src="index.js"></script>
+    </body>
+</html>

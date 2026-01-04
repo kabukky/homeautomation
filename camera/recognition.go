@@ -59,10 +59,10 @@ func RecognizeDryer(mat gocv.Mat) ([]int, error) {
 
 	// Coordinates for perspective transform
 	displayCoords := []image.Point{
-		image.Point{1460, 1000}, // top-left
-		image.Point{1458, 1048}, // bottom-left
-		image.Point{1576, 1040}, // bottom-right
-		image.Point{1579, 990},  // top-right
+		image.Point{1550, 1000}, // top-left
+		image.Point{1548, 1068}, // bottom-left
+		image.Point{1676, 1060}, // bottom-right
+		image.Point{1679, 1000}, // top-right
 	}
 	return recognizeDigits(&rotated, displayCoords, 210)
 }

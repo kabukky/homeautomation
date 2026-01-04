@@ -14,8 +14,6 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/kabukky/homeautomation/utils"
-	"github.com/muesli/smartcrop"
-	"github.com/muesli/smartcrop/nfnt"
 )
 
 var (
@@ -61,7 +59,7 @@ func GetPictureOfTheDay(deviceID string) (image.Image, error) {
 	}
 	// Adjust saturation for eink
 	img = imaging.AdjustSaturation(img, 50)
-	return crop(img, 0, 0, true)
+	return img, nil
 }
 
 func getRandomFilename() (string, error) {
@@ -88,40 +86,4 @@ func getRandomFilename() (string, error) {
 	}
 	index := randInstance.Intn(len(allMatches))
 	return filepath.Join(utils.PicturesOfTheDayDirectory, allMatches[index]), nil
-}
-
-func crop(img image.Image, w, h int, resize bool) (image.Image, error) {
-	width, height := getCropDimensions(img, w, h)
-	resizer := nfnt.NewDefaultResizer()
-	analyzer := smartcrop.NewAnalyzer(resizer)
-	topCrop, err := analyzer.FindBestCrop(img, width, height)
-	if err != nil {
-		return nil, err
-	}
-
-	type SubImager interface {
-		SubImage(r image.Rectangle) image.Image
-	}
-	img = img.(SubImager).SubImage(topCrop)
-	if resize && (img.Bounds().Dx() != width || img.Bounds().Dy() != height) {
-		img = resizer.Resize(img, uint(width), uint(height))
-	}
-	return img, nil
-}
-
-func getCropDimensions(img image.Image, width, height int) (int, int) {
-	// if we don't have width or height set use the smaller image dimension as both width and height
-	if width == 0 && height == 0 {
-		bounds := img.Bounds()
-		x := bounds.Dx()
-		y := bounds.Dy()
-		if x < y {
-			width = x
-			height = x
-		} else {
-			width = y
-			height = y
-		}
-	}
-	return width, height
 }
