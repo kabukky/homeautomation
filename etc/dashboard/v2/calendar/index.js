@@ -121,11 +121,11 @@ function showCalendar(data) {
                 var textColorString = "text-white";
                 var styleString = 'style="background-color:';
                 if (event.color == "black") {
-                    styleString += '#33ff00;"'
+                    styleString += '#00FF00;"'
                 } else {
                     // white
                     textColorString = "text-white";
-                    styleString += '#c51e80;"'
+                    styleString += '#FF0000;"'
                 }
                 eventsHtml.push({type: 'event', html: '<div class="entry-calendar row my-1 p-1 rounded ' + textColorString + '" ' + styleString + '><span class="px-1">' + event.title + '</span><small class="px-1">' + timeString + '</small></div>'})
             });
