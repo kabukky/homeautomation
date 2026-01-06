@@ -50,7 +50,7 @@ function showWeather(data) {
 
     // Current
     var currentTemperatureContainer = document.getElementById("weather-current-temperature");
-    currentTemperatureContainer.innerHTML = (data.current.temperature_celsius+10).toFixed().replace(/^-0$/, "0") + '<sup id="main-temp-degrees">°C</sup>';
+    currentTemperatureContainer.innerHTML = (data.current.temperature_celsius).toFixed().replace(/^-0$/, "0") + '<sup id="main-temp-degrees">°C</sup>';
 
     currentTemperatureContainer.innerHTML += '&nbsp;&nbsp;<i class="wi '+determineIconPrefix(sunset, sunrise, new Date(data.current.time))+data.current.openweathermap_id+'"></i>'
 
