@@ -298,7 +298,7 @@ function convertMinsToString(minutes) {
 
 function updateDashboard() {
     // Update date
-    var currentDate = moment(new Date());
+    var currentDate = moment(new Date()).add(moment.duration(30, "seconds")); // Add some seconds because rendering webpage and updating eink is slow on raspberry pi
     var dateContainer = document.getElementById("date");
     dateContainer.innerHTML = currentDate.format("dddd<br>Do MMMM YYYY");
     var timeContainer = document.getElementById("time");
