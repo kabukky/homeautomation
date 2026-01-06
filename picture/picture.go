@@ -31,7 +31,7 @@ func GetPictureOfTheDay(deviceID string) (image.Image, error) {
 	cachedPicturesOfTheDayMutex.RLock()
 	entry, ok := cachedPicturesOfTheDay[deviceID]
 	cachedPicturesOfTheDayMutex.RUnlock()
-	if !ok || time.Now().After(entry.generatedAt.Add(1*time.Minute)) {
+	if !ok || time.Now().After(entry.generatedAt.Add(1*time.Hour)) {
 		// Entry not generated yet
 		// Or generated > 1 hours ago
 		// Generate a new entry
