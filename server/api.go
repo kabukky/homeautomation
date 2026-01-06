@@ -41,12 +41,14 @@ func getPicture(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		respondWithError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	setNoCacheHeaders(w)
 	w.Header().Set("Content-Type", "image/jpeg")
 	imaging.Encode(w, img, imaging.JPEG)
 }
 
 func respondWithError(w http.ResponseWriter, errMsg string, code int) {
 	w.WriteHeader(code)
+	setNoCacheHeaders(w)
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(map[string]string{"error": errMsg})
 	if err != nil {
@@ -56,10 +58,15 @@ func respondWithError(w http.ResponseWriter, errMsg string, code int) {
 }
 
 func respondWithJSON(w http.ResponseWriter, resp interface{}) {
+	setNoCacheHeaders(w)
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		respondWithError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func setNoCacheHeaders(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "no-store, no-cache")
 }
