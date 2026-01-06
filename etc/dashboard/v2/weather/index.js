@@ -72,7 +72,7 @@ function showWeather(data) {
                 color: "#000000",
                 font: {
                     weight: "700",
-                    size: 20,
+                    size: 22,
                 },
                 formatter: function(value, context) {
                     return (Math.round(value) - temperatureOffset + "°").replace(/^-0$/, "0");
@@ -93,7 +93,7 @@ function showWeather(data) {
                 color: "#000000",
                 font: {
                     weight: "700",
-                    size: 15,
+                    size: 17,
                 },
                 formatter: function(value, context) {
                     if (value == 0) {
@@ -205,7 +205,7 @@ function showWeather(data) {
                 ticks: {
                     color: "#000000",
                     font: {
-                        size: 18
+                        size: 20
                     }
                 }
             }
