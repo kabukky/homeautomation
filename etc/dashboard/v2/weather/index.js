@@ -189,7 +189,6 @@ function showWeather(data) {
         },
         scales: {
             yAxis: {
-                display: false,
                 grid: {
                     display: false,
                     color: "#7f7f7f"
@@ -200,7 +199,6 @@ function showWeather(data) {
                 max: maxForecastTemperature + temperatureOffset + 1,
             },
             xAxis: {
-                display: false,
                 grid: {
                     display: false,
                     color: "#7f7f7f"
