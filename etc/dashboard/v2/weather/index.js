@@ -200,6 +200,7 @@ function showWeather(data) {
             },
             xAxis: {
                 grid: {
+                    display: false,
                     color: "#7f7f7f"
                 },
                 ticks: {
