@@ -279,7 +279,7 @@ func Dilate(src Mat, dst *Mat, kernel Mat) error {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga4ff0f3318642c4f469d0e11f242f3b6c
-func DilateWithParams(src Mat, dst *Mat, kernel Mat, anchor image.Point, iterations, borderType BorderType, borderValue color.RGBA) error {
+func DilateWithParams(src Mat, dst *Mat, kernel Mat, anchor image.Point, iterations int, borderType BorderType, borderValue color.RGBA) error {
 	cAnchor := C.struct_Point{
 		x: C.int(anchor.X),
 		y: C.int(anchor.Y),
@@ -341,7 +341,7 @@ func Erode(src Mat, dst *Mat, kernel Mat) error {
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gaeb1e0c1033e3f6b891a25d0511362aeb
-func ErodeWithParams(src Mat, dst *Mat, kernel Mat, anchor image.Point, iterations, borderType int) error {
+func ErodeWithParams(src Mat, dst *Mat, kernel Mat, anchor image.Point, iterations int, borderType BorderType) error {
 	cAnchor := C.struct_Point{
 		x: C.int(anchor.X),
 		y: C.int(anchor.Y),
@@ -356,7 +356,7 @@ func ErodeWithParams(src Mat, dst *Mat, kernel Mat, anchor image.Point, iteratio
 //
 // For further details, please see:
 // https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gaeb1e0c1033e3f6b891a25d0511362aeb
-func ErodeWithParamsAndBorderValue(src Mat, dst *Mat, kernel Mat, anchor image.Point, iterations, borderType int, borderValue Scalar) error {
+func ErodeWithParamsAndBorderValue(src Mat, dst *Mat, kernel Mat, anchor image.Point, iterations int, borderType BorderType, borderValue Scalar) error {
 	cAnchor := C.struct_Point{
 		x: C.int(anchor.X),
 		y: C.int(anchor.Y),
@@ -1756,19 +1756,28 @@ type ColormapTypes int
 // For further details, please see:
 // https://docs.opencv.org/master/d3/d50/group__imgproc__colormap.html#ga9a805d8262bcbe273f16be9ea2055a65
 const (
-	ColormapAutumn  ColormapTypes = 0
-	ColormapBone    ColormapTypes = 1
-	ColormapJet     ColormapTypes = 2
-	ColormapWinter  ColormapTypes = 3
-	ColormapRainbow ColormapTypes = 4
-	ColormapOcean   ColormapTypes = 5
-	ColormapSummer  ColormapTypes = 6
-	ColormapSpring  ColormapTypes = 7
-	ColormapCool    ColormapTypes = 8
-	ColormapHsv     ColormapTypes = 9
-	ColormapPink    ColormapTypes = 10
-	ColormapHot     ColormapTypes = 11
-	ColormapParula  ColormapTypes = 12
+	ColormapAutumn          ColormapTypes = 0
+	ColormapBone            ColormapTypes = 1
+	ColormapJet             ColormapTypes = 2
+	ColormapWinter          ColormapTypes = 3
+	ColormapRainbow         ColormapTypes = 4
+	ColormapOcean           ColormapTypes = 5
+	ColormapSummer          ColormapTypes = 6
+	ColormapSpring          ColormapTypes = 7
+	ColormapCool            ColormapTypes = 8
+	ColormapHsv             ColormapTypes = 9
+	ColormapPink            ColormapTypes = 10
+	ColormapHot             ColormapTypes = 11
+	ColormapParula          ColormapTypes = 12
+	ColormapMagma           ColormapTypes = 13
+	ColormapInferno         ColormapTypes = 14
+	ColormapPlasma          ColormapTypes = 15
+	ColormapViridis         ColormapTypes = 16
+	ColormapCividis         ColormapTypes = 17
+	ColormapTwilight        ColormapTypes = 18
+	ColormapTwilightShifted ColormapTypes = 19
+	ColormapTurbo           ColormapTypes = 20
+	ColormapDeepGreen       ColormapTypes = 21
 )
 
 // ApplyColorMap applies a GNU Octave/MATLAB equivalent colormap on a given image.
@@ -1821,23 +1830,6 @@ func GetAffineTransform(src, dst PointVector) Mat {
 // https://docs.opencv.org/master/da/d54/group__imgproc__transform.html#ga8f6d378f9f8eebb5cb55cd3ae295a999
 func GetAffineTransform2f(src, dst Point2fVector) Mat {
 	return newMat(C.GetAffineTransform2f(src.p, dst.p))
-}
-
-type HomographyMethod int
-
-const (
-	HomographyMethodAllPoints HomographyMethod = 0
-	HomographyMethodLMEDS     HomographyMethod = 4
-	HomographyMethodRANSAC    HomographyMethod = 8
-	HomographyMethodRHO       HomographyMethod = 16
-)
-
-// FindHomography finds an optimal homography matrix using 4 or more point pairs (as opposed to GetPerspectiveTransform, which uses exactly 4)
-//
-// For further details, please see:
-// https://docs.opencv.org/master/d9/d0c/group__calib3d.html#ga4abc2ece9fab9398f2e560d53c8c9780
-func FindHomography(srcPoints Mat, targetPoints Mat, method HomographyMethod, ransacReprojThreshold float64, mask *Mat, maxIters int, confidence float64) Mat {
-	return newMat(C.FindHomography(srcPoints.Ptr(), targetPoints.Ptr(), C.int(method), C.double(ransacReprojThreshold), mask.Ptr(), C.int(maxIters), C.double(confidence)))
 }
 
 // DrawContours draws contours outlines or filled contours.

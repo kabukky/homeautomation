@@ -1,3 +1,52 @@
+0.43.0
+---
+* **all**
+    - update to OpenCV 4.13
+* **core**
+    - add Copy method to Mat (#1346)
+    - improve implementation for NewPointVectorFromPoints
+* **cuda**
+    - add implmentations for more arith functions
+* **imgproc**
+    - added in missing colormaps
+    - paramters types in improc dilate and erode functions
+    - use same test values as OpenCV tests for TestMinAreaRect and TestMinAreaRect2f
+* **videoio**
+    - add RetrieveChannel function to make it possible to capture both video and audio
+* **examples**
+    - Fix bugs and memory leaks in yolov8 example (#1349)
+* **contrib**
+    - add support for Macbeth Chart module (MCC) (#1336)
+* **install**
+    - windows: split download and build scripts for easier usage/integration
+
+0.42.0
+---
+* **all**
+    - Update to OpenCV 4.12.0
+    - Expose GpuMat's underlying object pointer
+    - Add support for reduced size OpenCV builds using build tags for specific modules (cuda, contrib, etc.)
+- **cuda**
+    - Add LShift and RShift function implementations
+    - Add Compare function implementation
+    - Add implementations for Norm, CalcNorm, and CalcNormDiff functions
+    - Add Cuda Morphology Filter (#1311)
+- **core**
+    - Add ReshapeWithSize() to provide specific control over the reshape operation
+    - Add MeanStdDevWithMask for cv::meanStdDev with the optional mask
+- **video**
+    - Add video tracker implementation using Vit DNN
+    - Add cv::stereoRectify binding
+- **docker**
+    - Update OpenCV containers to 4.12.0
+- **docs**
+    - Update ROADMAP links and add missing tracker functions
+    - Update README with new features and usage
+- **build**
+    - Use build tags for reduced size OpenCV builds with specific modules
+- **bugfix**
+    - Fix bug where the package name was mismatched with contrib (#1293)
+
 0.41.0
 ---
 * **all**

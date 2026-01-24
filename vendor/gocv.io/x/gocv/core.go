@@ -437,6 +437,17 @@ func (m *Mat) Row(row int) Mat {
 	return newMat(C.Mat_Row(m.p, C.int(row)))
 }
 
+// Copy returns a shallow copy of the Mat. No data is copied.
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d3/d63/classcv_1_1Mat.html#a294eaf8a95d2f9c7be19ff594d06278e
+func (m *Mat) Copy() Mat {
+	return Mat{
+		p: C.Mat_Copy(m.p),
+		d: m.d,
+	}
+}
+
 // Clone returns a cloned full copy of the Mat.
 func (m *Mat) Clone() Mat {
 	return newMat(C.Mat_Clone(m.p))
@@ -657,6 +668,24 @@ func (m *Mat) Region(rio image.Rectangle) Mat {
 // https://docs.opencv.org/master/d3/d63/classcv_1_1Mat.html#a4eb96e3251417fa88b78e2abd6cfd7d8
 func (m *Mat) Reshape(cn int, rows int) Mat {
 	return newMat(C.Mat_Reshape(m.p, C.int(cn), C.int(rows)))
+}
+
+// ReshapeWithSize changes the shape and/or the number of channels of a 2D matrix without copying the data.
+//
+// For further details, please see:
+// https://docs.opencv.org/master/d3/d63/classcv_1_1Mat.html#a4eb96e3251417fa88b78e2abd6cfd7d8
+func (m *Mat) ReshapeWithSize(cn int, dims []int) Mat {
+	cDimsArray := make([]C.int, len(dims))
+	for i, ft := range dims {
+		cDimsArray[i] = C.int(ft)
+	}
+
+	cDimsVector := C.IntVector{
+		val:    (*C.int)(&cDimsArray[0]),
+		length: C.int(len(dims)),
+	}
+
+	return newMat(C.Mat_ReshapeWithSize(m.p, C.int(cn), cDimsVector))
 }
 
 // ConvertFp16 converts a Mat to half-precision floating point.
@@ -1552,6 +1581,14 @@ func MeanStdDev(src Mat, dst *Mat, dstStdDev *Mat) error {
 	return OpenCVResult(C.Mat_MeanStdDev(src.p, dst.p, dstStdDev.p))
 }
 
+// MeanStdDevWithMask calculates a mean and standard deviation of array elements while applying the mask.
+//
+// For further details, please see:
+// https://docs.opencv.org/4.x/d2/de8/group__core__array.html#ga846c858f4004d59493d7c6a4354b301d
+func MeanStdDevWithMask(src Mat, dstMean *Mat, dstStdDev *Mat, mask Mat) error {
+	return OpenCVResult(C.Mat_MeanStdDevWithMask(src.p, dstMean.p, dstStdDev.p, mask.p))
+}
+
 // Merge creates one multi-channel array out of several single-channel ones.
 //
 // For further details, please see:
@@ -2154,15 +2191,9 @@ func NewPointVectorFromPoints(pts []image.Point) PointVector {
 	p := (*C.struct_Point)(C.malloc(C.size_t(C.sizeof_struct_Point * len(pts))))
 	defer C.free(unsafe.Pointer(p))
 
-	h := &reflect.SliceHeader{
-		Data: uintptr(unsafe.Pointer(p)),
-		Len:  len(pts),
-		Cap:  len(pts),
-	}
-	pa := *(*[]C.Point)(unsafe.Pointer(h))
-
+	h := unsafe.Slice(p, len(pts))
 	for j, point := range pts {
-		pa[j] = C.struct_Point{
+		h[j] = C.struct_Point{
 			x: C.int(point.X),
 			y: C.int(point.Y),
 		}

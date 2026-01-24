@@ -1,6 +1,6 @@
 var temperatureChart = null;
 var calendar = null;
-const maxHours = 16; // Only show forecast a few hours into the future
+const maxHours = 14; // Only show forecast a few hours into the future
 const temperatureOffset = 8; // Offset for showing temperatures on the chart
 document.fonts.onloadingdone = () => {
     if (temperatureChart) {
@@ -52,7 +52,8 @@ function showWeather(data) {
     var currentTemperatureContainer = document.getElementById("weather-current-temperature");
     currentTemperatureContainer.innerHTML = (data.current.temperature_celsius).toFixed().replace(/^-0$/, "0") + '<sup id="main-temp-degrees">°C</sup>';
 
-    currentTemperatureContainer.innerHTML += '&nbsp;&nbsp;<i class="wi '+determineIconPrefix(sunset, sunrise, new Date(data.current.time))+data.current.openweathermap_id+'"></i>'
+    var currentWeatherIconeContainer = document.getElementById("weather-current-icon");
+    currentWeatherIconeContainer.innerHTML += '<i class="wi '+determineIconPrefix(sunset, sunrise, new Date(data.current.time))+data.current.openweathermap_id+'"></i>'
 
     var currentUVIndexContainer = document.getElementById("weather-current-uv-index");
     currentUVIndexContainer.innerHTML = 'UVI&nbsp;&nbsp;<i class="wi wi-day-sunny"></i>&nbsp;'+Math.round(data.current.uv_index);
@@ -62,17 +63,17 @@ function showWeather(data) {
         labels: [],
         datasets: [{
             label: "Temperature",
-            borderWidth: 3,
+            borderWidth: 4,
             borderColor: "#000000",
             pointBackgroundColor: "#000000",
             pointBorderColor: "#ffffff",
-            pointBorderWidth: 3,
-            pointRadius: 6,
+            pointBorderWidth: 4,
+            pointRadius: 7,
             datalabels: {
                 color: "#000000",
                 font: {
                     weight: "700",
-                    size: 22,
+                    size: 26,
                 },
                 formatter: function(value, context) {
                     return (Math.round(value) - temperatureOffset + "°").replace(/^-0$/, "0");
@@ -85,15 +86,13 @@ function showWeather(data) {
             borderColor: "#000000",
             pointBackgroundColor: "#000000",
             pointBorderColor: "#ffffff",
-            pointBorderWidth: 2,
-            pointRadius: 4,
-            fill: true,
-            backgroundColor: "#cccccc",
+            pointBorderWidth: 3,
+            pointRadius: 5,
             datalabels: {
                 color: "#000000",
                 font: {
                     weight: "700",
-                    size: 17,
+                    size: 22,
                 },
                 formatter: function(value, context) {
                     if (value == 0) {
@@ -168,7 +167,7 @@ function showWeather(data) {
     }
 
     var chartOptions = {
-        aspectRatio: 2.7,
+        aspectRatio: 3.3,
         responsive: true,
         maintainAspectRatio: false,
         layout: {
@@ -206,7 +205,7 @@ function showWeather(data) {
                 ticks: {
                     color: "#000000",
                     font: {
-                        size: 20
+                        size: 22
                     }
                 }
             }
