@@ -1,3 +1,5 @@
+//go:build !gocv_specific_modules || (gocv_specific_modules && gocv_videoio)
+
 #include <stdexcept>
 #include "videoio.h"
 
@@ -139,6 +141,15 @@ int VideoCapture_Retrieve(VideoCapture v, Mat buf) {
     } catch(const cv::Exception& e){
         setExceptionInfo(e.code, e.what());
 		return 0;
+    }
+}
+
+int VideoCapture_RetrieveChannel(VideoCapture v, Mat buf, int channel) {
+    try {
+        return v->retrieve(*buf, channel);
+    } catch(const cv::Exception& e){
+        setExceptionInfo(e.code, e.what());
+        return 0;
     }
 }
 

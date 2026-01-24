@@ -22,19 +22,20 @@ body {
 }
 
 #date {
-    font-size: 2.2em;
+    font-size: 2.6em;
 }
 
 #time {
-    font-size: 4.0em;
+    font-size: 6em;
 }
 
 #weather-current-temperature {
-    font-size: 5em;
+    font-size: 7em;
+    margin-top: -0.5rem !important;
 }
 
 #weather-current-icon {
-    font-size: 5em;
+    font-size: 6em;
 }
 
 #weather-current-uv-index {
@@ -42,15 +43,15 @@ body {
 }
 
 #temperature-chart-images .wi {
-    font-size: 1.9em;
+    font-size: 2.2em;
 }
 
 #temperature-chart-precipitation-probability {
-    font-size: 1.1em !important;
+    font-size: 1.3em !important;
 }
 
 #temperature-chart-uv-index {
-    font-size: 1em !important;
+    font-size: 1.2em !important;
 }
 
 #main-temp-degrees {

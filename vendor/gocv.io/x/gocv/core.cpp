@@ -168,6 +168,10 @@ Mat Mat_Row(Mat m, int r) {
     return new cv::Mat(m->row(r));
 }
 
+Mat Mat_Copy(Mat m) {
+    return new cv::Mat(*m);
+}
+
 // Mat_Clone returns a clone of this Mat
 Mat Mat_Clone(Mat m) {
     return new cv::Mat(m->clone());
@@ -228,6 +232,19 @@ Mat Mat_Region(Mat m, Rect r) {
 Mat Mat_Reshape(Mat m, int cn, int rows) {
     try {
         return new cv::Mat(m->reshape(cn, rows));
+    } catch(const cv::Exception& e){
+        setExceptionInfo(e.code, e.what());
+        return new cv::Mat();
+    }
+}
+
+Mat Mat_ReshapeWithSize(Mat m, int cn, struct IntVector dims) {
+    try {
+        std::vector<int> _dims;
+        for (int i = 0, *v = dims.val; i < dims.length; ++v, ++i) {
+            _dims.push_back(*v);
+        }
+        return new cv::Mat(m->reshape(cn, _dims));
     } catch(const cv::Exception& e){
         setExceptionInfo(e.code, e.what());
         return new cv::Mat();
@@ -1020,6 +1037,15 @@ OpenCVResult Mat_Max(Mat src1, Mat src2, Mat dst) {
 OpenCVResult Mat_MeanStdDev(Mat src, Mat dstMean, Mat dstStdDev) {
     try {
         cv::meanStdDev(*src, *dstMean, *dstStdDev);
+        return successResult();
+    } catch(const cv::Exception& e) {
+        return errorResult(e.code, e.what());
+    }
+}
+
+OpenCVResult Mat_MeanStdDevWithMask(Mat src, Mat dstMean, Mat dstStdDev, Mat mask) {
+    try {
+        cv::meanStdDev(*src, *dstMean, *dstStdDev, *mask);
         return successResult();
     } catch(const cv::Exception& e) {
         return errorResult(e.code, e.what());

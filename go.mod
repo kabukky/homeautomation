@@ -8,7 +8,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/muesli/smartcrop v0.3.0
-	gocv.io/x/gocv v0.41.0
+	gocv.io/x/gocv v0.43.0
 	google.golang.org/api v0.60.0
 )
 
