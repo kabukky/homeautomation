@@ -59,6 +59,7 @@ func GetPictureOfTheDay(deviceID string) (image.Image, error) {
 	}
 	// Adjust saturation for eink
 	img = imaging.AdjustSaturation(img, 50)
+	img = imaging.AdjustContrast(img, -5)
 	return img, nil
 }
 
