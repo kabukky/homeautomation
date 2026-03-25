@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/disintegration/imaging"
@@ -47,6 +48,7 @@ func getPicture(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func respondWithError(w http.ResponseWriter, errMsg string, code int) {
+	log.Println("Responding with error:", errMsg, code)
 	w.WriteHeader(code)
 	setNoCacheHeaders(w)
 	w.Header().Set("Content-Type", "application/json")
