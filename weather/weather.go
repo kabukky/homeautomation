@@ -79,10 +79,12 @@ func GetCached(ctx context.Context) (*Data, error) {
 	if cached == nil || time.Now().After(cached.NextRefresh) {
 		response, err := Get(ctx)
 		if err != nil {
+			log.Println("Could not get weather response:", err)
 			if cached != nil {
-				log.Println("Could not get weather response. Using cache:", err)
+				log.Println("Using cache:", cached)
 				return cached.Response, nil
 			}
+			log.Println("No cache to use.")
 			return nil, err
 		}
 		weatherCacheMutex.Lock()
