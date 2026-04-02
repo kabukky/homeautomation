@@ -76,24 +76,46 @@ func GetCached(ctx context.Context) (*Data, error) {
 	weatherCacheMutex.RLock()
 	cached := weatherCache
 	weatherCacheMutex.RUnlock()
-	if cached == nil || time.Now().After(cached.NextRefresh) {
-		response, err := Get(ctx)
-		if err != nil {
-			log.Println("Could not get weather response:", err)
-			if cached != nil {
-				log.Println("Using cache:", cached)
-				return cached.Response, nil
-			}
-			log.Println("No cache to use.")
-			return nil, err
-		}
-		weatherCacheMutex.Lock()
-		// Refresh every 10 minutes
-		weatherCache = &WeatherCacheEntry{Response: response, NextRefresh: time.Now().Add(weatherCacheDuration)}
-		cached = weatherCache
-		weatherCacheMutex.Unlock()
+
+	// 1. If the cache is completely empty, we have nothing to return.
+	// We MUST block and fetch synchronously this first time.
+	if cached == nil {
+		return fetchAndUpdateCache(ctx)
 	}
+
+	// 2. If the cache exists but is expired, trigger an async refresh.
+	if time.Now().After(cached.NextRefresh) {
+		// TryLock (Go 1.18+) prevents a "cache stampede". It ensures only ONE
+		// background goroutine refreshes the cache at a time.
+		go func() {
+			// Run the fetch in the background. If it fails, the cache
+			// remains stale and the next request will attempt to refresh it again.
+			_, err := fetchAndUpdateCache(context.Background())
+			if err != nil {
+				log.Println("Could not update weather cache:", err)
+			}
+		}()
+	}
+
+	// 3. Immediately return the cached response (which may be slightly stale)
 	return cached.Response, nil
+}
+
+func fetchAndUpdateCache(ctx context.Context) (*Data, error) {
+	response, err := Get(ctx)
+	if err != nil {
+		log.Println("Could not get weather response:", err)
+		return nil, err
+	}
+
+	weatherCacheMutex.Lock()
+	weatherCache = &WeatherCacheEntry{
+		Response:    response,
+		NextRefresh: time.Now().Add(weatherCacheDuration),
+	}
+	weatherCacheMutex.Unlock()
+
+	return response, nil
 }
 
 func Get(ctx context.Context) (*Data, error) {
