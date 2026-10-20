@@ -115,39 +115,11 @@ func refreshTimes() {
 			log.Println("Error while getting washing machine image:", err)
 			return
 		}
-		interpolated := false
-		digits, err := RecognizeWashingMachine(image)
+		minutes, err := RecognizeWashingMachine(image)
 		if err != nil {
-			if err == errorNoDigits {
-				// Off
-			} else if err == errorMachineDone {
-				times.WashingMachineMinutes = -1
-			} else {
-				log.Println("Error while recognizing washing machine digits:", err)
-				// Interpolate if possible
-				globalTimesMutex.RLock()
-				minutesBefore := globalTimes.WashingMachineMinutes
-				interpolatedCount := globalTimes.WashingMachineInterpolatedCount
-				globalTimesMutex.RUnlock()
-				if interpolatedCount < maxInterpolatedCount && minutesBefore > updatePauseInMinutes {
-					times.WashingMachineMinutes = minutesBefore - updatePauseInMinutes
-					times.WashingMachineInterpolatedCount = interpolatedCount + 1
-					interpolated = true
-				}
-			}
-		} else if len(digits) == 3 {
-			// Compute minutes from digits
-			times.WashingMachineMinutes = 0
-			times.WashingMachineMinutes += 60 * digits[0]
-			times.WashingMachineMinutes += 10 * digits[1]
-			times.WashingMachineMinutes += digits[2]
-		}
-		if !interpolated {
-			times.WashingMachineInterpolatedCount = 0
-		}
-		// Fix: Sometimes negative minutes are recognized
-		if times.WashingMachineMinutes < -2 {
 			times.WashingMachineMinutes = -1
+		} else {
+			times.WashingMachineMinutes = minutes
 		}
 	}()
 
