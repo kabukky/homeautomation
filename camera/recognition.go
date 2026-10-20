@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/disintegration/imaging"
 	"github.com/kabukky/homeautomation/utils"
 	"gocv.io/x/gocv"
 )
@@ -59,38 +60,25 @@ func RecognizeDryer(mat gocv.Mat) ([]int, error) {
 
 	// Coordinates for perspective transform
 	displayCoords := []image.Point{
-		image.Point{1510, 950}, // top-left
+		image.Point{1510, 950},  // top-left
 		image.Point{1510, 1000}, // bottom-left
 		image.Point{1630, 1000}, // bottom-right
-		image.Point{1630, 940}, // top-right
+		image.Point{1630, 940},  // top-right
 	}
 	return recognizeDigits(&rotated, displayCoords, 210)
 }
 
-func RecognizeWashingMachine(imageBytes []byte) ([]int, error) {
+func RecognizeWashingMachine(imageBytes []byte) (int, error) {
 	img, _, err := image.Decode(bytes.NewReader(imageBytes))
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	mat, err := gocv.ImageToMatRGB(img)
+	img = imaging.Rotate90(img)
+	rd, err := ReadWashingMachine(img)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	defer mat.Close()
-
-	// Rotate
-	rotated := gocv.NewMat()
-	defer rotated.Close()
-	gocv.Rotate(mat, &rotated, gocv.Rotate90CounterClockwise)
-
-	// Coordinates for perspective transform
-	displayCoords := []image.Point{
-		image.Point{437, 215}, // top-left
-		image.Point{442, 258}, // bottom-left
-		image.Point{517, 246}, // bottom-right
-		image.Point{512, 201}, // top-right
-	}
-	return recognizeDigits(&rotated, displayCoords, 160)
+	return rd.Minutes, nil
 }
 
 func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold float32) ([]int, error) {
@@ -98,7 +86,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 		temp := mat.Clone()
 		defer temp.Close()
 		gocv.Polylines(&temp, gocv.NewPointsVectorFromPoints([][]image.Point{displayCoords}), true, color.RGBA{255, 0, 0, 255}, 1)
-		window := gocv.NewWindow("Hello")
+		window := gocv.NewWindow("Polylines")
 		for {
 			window.IMShow(temp)
 			if window.WaitKey(1) >= 0 {
@@ -121,7 +109,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	defer perspective.Close()
 	gocv.WarpPerspective(*mat, &perspective, transform, image.Point{width, height})
 	if utils.CameraDebug {
-		window := gocv.NewWindow("Hello")
+		window := gocv.NewWindow("Perspective")
 		for {
 			window.IMShow(perspective)
 			if window.WaitKey(1) >= 0 {
@@ -141,7 +129,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	gocv.Threshold(destGray, &destThreshold, minThreshold, 255, gocv.ThresholdBinary)
 
 	if utils.CameraDebug {
-		window := gocv.NewWindow("Hello")
+		window := gocv.NewWindow("Threshold")
 		for {
 			window.IMShow(destThreshold)
 			if window.WaitKey(1) >= 0 {
@@ -155,7 +143,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	defer destEdge.Close()
 	gocv.Canny(destThreshold, &destEdge, 50, 200)
 	if utils.CameraDebug {
-		window := gocv.NewWindow("Hello")
+		window := gocv.NewWindow("Edges")
 		for {
 			window.IMShow(destEdge)
 			if window.WaitKey(1) >= 0 {
@@ -171,7 +159,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	defer kernelDilate.Close()
 	gocv.Dilate(destEdge, &destDilate, kernelDilate)
 	if utils.CameraDebug {
-		window := gocv.NewWindow("Hello")
+		window := gocv.NewWindow("Dilate")
 		for {
 			window.IMShow(destDilate)
 			if window.WaitKey(1) >= 0 {
@@ -233,7 +221,7 @@ func recognizeDigits(mat *gocv.Mat, displayCoords []image.Point, minThreshold fl
 	var recognizedDigits []int
 	for index, digit := range digits {
 		if utils.CameraDebug {
-			window := gocv.NewWindow("Hello")
+			window := gocv.NewWindow("Digits")
 			for {
 				window.IMShow(*digit.mat)
 				if window.WaitKey(1) >= 0 {

@@ -20,6 +20,11 @@ var (
 )
 
 func init() {
+	if utils.CameraDebug {
+		// No calendar service needed in camera debug mode.
+		// We would need google cloud credentials, that is too much hassle for now, so just skip it.
+		return
+	}
 	s, err := calendar.NewService(context.Background())
 	if err != nil {
 		log.Fatal("Could not create google calendar service:", err)
